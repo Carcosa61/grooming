@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">ระบบจัดการร้านตัดขนสัตว์</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">แดชบอร์ด</string>
+    <string name="nav_bookings">การจอง</string>
+    <string name="nav_pets">สัตว์เลี้ยง</string>
+    <string name="nav_calendar">ปฏิทิน</string>
+    <string name="nav_settings">ตั้งค่า</string>
+
+    <!-- Booking Status -->
+    <string name="status_scheduled">นัดหมายแล้ว</string>
+    <string name="status_checked_in">เช็คอินแล้ว</string>
+    <string name="status_grooming">กำลังตัดขน</string>
+    <string name="status_ready_for_collection">พร้อมรับ</string>
+    <string name="status_completed">เสร็จสิ้น</string>
+    <string name="status_cancelled">ยกเลิก</string>
+    <string name="status_no_show">ไม่มา</string>
+
+    <!-- Services -->
+    <string name="service_bath">อาบน้ำ</string>
+    <string name="service_bath_dry">อาบน้ำและเป่าขน</string>
+    <string name="service_full_groom">ตัดขนเต็มรูปแบบ</string>
+    <string name="service_nail_trim">ตัดเล็บ</string>
+    <string name="service_ear_cleaning">ทำความสะอาดหู</string>
+    <string name="service_custom">บริการพิเศษ</string>
+
+    <!-- Booking Form -->
+    <string name="booking_title">จองใหม่</string>
+    <string name="booking_edit_title">แก้ไขการจอง</string>
+    <string name="customer_name">ชื่อลูกค้า</string>
+    <string name="mobile_number">เบอร์โทรศัพท์</string>
+    <string name="pet_name">ชื่อสัตว์เลี้ยง</string>
+    <string name="pet_breed">สายพันธุ์</string>
+    <string name="appointment_date">วันที่นัดหมาย</string>
+    <string name="appointment_time">เวลานัดหมาย</string>
+    <string name="service_type">ประเภทบริการ</string>
+    <string name="notes">หมายเหตุ</string>
+    <string name="save">บันทึก</string>
+    <string name="cancel">ยกเลิก</string>
+    <string name="delete">ลบ</string>
+
+    <!-- Pet Profile -->
+    <string name="pet_profile_title">โปรไฟล์สัตว์เลี้ยง</string>
+    <string name="owner_info">ข้อมูลเจ้าของ</string>
+    <string name="pet_info">ข้อมูลสัตว์เลี้ยง</string>
+    <string name="medical_notes">บันทึกทางการแพทย์</string>
+    <string name="grooming_history">ประวัติการตัดขน</string>
+    <string name="date_of_birth">วันเกิด</string>
+    <string name="gender">เพศ</string>
+    <string name="weight">น้ำหนัก</string>
+    <string name="color">สี</string>
+    <string name="allergies">อาการแพ้</string>
+    <string name="medications">ยา</string>
+    <string name="behavior_notes">พฤติกรรมที่ควรทราบ</string>
+    <string name="gender_male">ตัวผู้</string>
+    <string name="gender_female">ตัวเมีย</string>
+    <string name="add_photo">เพิ่มรูป</string>
+    <string name="before_photo">ก่อน</string>
+    <string name="after_photo">หลัง</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">แดชบอร์ด</string>
+    <string name="due_soon">ใกล้ถึงกำหนด</string>
+    <string name="due_today">ถึงกำหนดวันนี้</string>
+    <string name="overdue">เลยกำหนด</string>
+    <string name="todays_appointments">นัดหมายวันนี้</string>
+
+    <!-- Calendar -->
+    <string name="calendar_daily">รายวัน</string>
+    <string name="calendar_weekly">รายสัปดาห์</string>
+
+    <!-- Search -->
+    <string name="search_hint">ค้นหาด้วยชื่อลูกค้า เบอร์โทร หรือชื่อสัตว์เลี้ยง</string>
+    <string name="no_results">ไม่พบผลลัพธ์</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_48h">เตือนความจำ: %1$s มีนัดตัดขนวันที่ %2$s เวลา %3$s</string>
+    <string name="notification_reminder_2h">เตือนความจำ: %1$s มีนัดตัดขนวันนี้เวลา %2$s</string>
+    <string name="notification_ready">%1$s พร้อมรับกลับบ้านแล้ว</string>
+    <string name="notification_missed">%1$s ไม่ได้มาตามนัดวันนี้ กรุณาติดต่อเพื่อนัดใหม่</string>
+
+    <!-- Rebooking -->
+    <string name="rebooking_due_soon">%1$s ใกล้ถึงกำหนดตัดขนสัปดาห์หน้า</string>
+    <string name="rebooking_due_today">%1$s ถึงกำหนดตัดขนวันนี้</string>
+    <string name="rebooking_overdue">%1$s เลยกำหนดตัดขนแล้ว จองเลย!</string>
+    <string name="rebooking_interval">ช่วงเวลานัดครั้งต่อไป</string>
+    <string name="weeks_format">%1$d สัปดาห์</string>
+
+    <!-- Backup -->
+    <string name="backup_settings">ตั้งค่าการสำรองข้อมูล</string>
+    <string name="backup_now">สำรองข้อมูลเดี๋ยวนี้</string>
+    <string name="restore">กู้คืน</string>
+    <string name="last_backup">สำรองข้อมูลล่าสุด: %1$s</string>
+    <string name="backup_success">สำรองข้อมูลสำเร็จ</string>
+    <string name="backup_failed">สำรองข้อมูลล้มเหลว</string>
+
+    <!-- General -->
+    <string name="loading">กำลังโหลด…</string>
+    <string name="error_occurred">เกิดข้อผิดพลาด</string>
+    <string name="retry">ลองอีกครั้ง</string>
+    <string name="confirm">ยืนยัน</string>
+    <string name="email">อีเมล</string>
+</resources>

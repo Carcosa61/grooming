@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App -->
+    <string name="app_name">Pet Grooming Manager</string>
+
+    <!-- Navigation -->
+    <string name="nav_dashboard">Dashboard</string>
+    <string name="nav_bookings">Bookings</string>
+    <string name="nav_pets">Pets</string>
+    <string name="nav_calendar">Calendar</string>
+    <string name="nav_settings">Settings</string>
+
+    <!-- Booking Status -->
+    <string name="status_scheduled">Scheduled</string>
+    <string name="status_checked_in">Checked In</string>
+    <string name="status_grooming">Grooming</string>
+    <string name="status_ready_for_collection">Ready for Collection</string>
+    <string name="status_completed">Completed</string>
+    <string name="status_cancelled">Cancelled</string>
+    <string name="status_no_show">No Show</string>
+
+    <!-- Services -->
+    <string name="service_bath">Bath</string>
+    <string name="service_bath_dry">Bath &amp; Dry</string>
+    <string name="service_full_groom">Full Groom</string>
+    <string name="service_nail_trim">Nail Trim</string>
+    <string name="service_ear_cleaning">Ear Cleaning</string>
+    <string name="service_custom">Custom</string>
+
+    <!-- Booking Form -->
+    <string name="booking_title">New Booking</string>
+    <string name="booking_edit_title">Edit Booking</string>
+    <string name="customer_name">Customer Name</string>
+    <string name="mobile_number">Mobile Number</string>
+    <string name="pet_name">Pet Name</string>
+    <string name="pet_breed">Breed</string>
+    <string name="appointment_date">Appointment Date</string>
+    <string name="appointment_time">Appointment Time</string>
+    <string name="service_type">Service Type</string>
+    <string name="notes">Notes</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="delete">Delete</string>
+
+    <!-- Pet Profile -->
+    <string name="pet_profile_title">Pet Profile</string>
+    <string name="owner_info">Owner Information</string>
+    <string name="pet_info">Pet Information</string>
+    <string name="medical_notes">Medical Notes</string>
+    <string name="grooming_history">Grooming History</string>
+
+    <!-- Actions -->
+    <string name="create_booking">Create Booking</string>
+    <string name="add_pet">Add Pet</string>
+    <string name="search_pets">Search Pets</string>
+    <string name="todays_bookings">Today\'s Bookings</string>
+    <string name="no_bookings_today">No bookings today</string>
+    <string name="view_all">View All</string>
+
+    <!-- Rebooking Status -->
+    <string name="rebooking_due_soon">Due Soon</string>
+    <string name="rebooking_due_today">Due Today</string>
+    <string name="rebooking_overdue">Overdue</string>
+
+    <!-- Pet Details -->
+    <string name="date_of_birth">Date of Birth</string>
+    <string name="gender">Gender</string>
+    <string name="weight">Weight</string>
+    <string name="color">Color</string>
+    <string name="allergies">Allergies</string>
+    <string name="medications">Medications</string>
+    <string name="behavior_notes">Behavior Notes</string>
+    <string name="gender_male">Male</string>
+    <string name="gender_female">Female</string>
+    <string name="add_photo">Add Photo</string>
+    <string name="before_photo">Before</string>
+    <string name="after_photo">After</string>
+
+    <!-- Dashboard -->
+    <string name="dashboard_title">Dashboard</string>
+    <string name="due_soon">Due Soon</string>
+    <string name="due_today">Due Today</string>
+    <string name="overdue">Overdue</string>
+    <string name="todays_appointments">Today\'s Appointments</string>
+
+    <!-- Calendar -->
+    <string name="calendar_daily">Daily</string>
+    <string name="calendar_weekly">Weekly</string>
+
+    <!-- Search -->
+    <string name="search_hint">Search by customer, phone, or pet name</string>
+    <string name="no_results">No results found</string>
+
+    <!-- Notifications -->
+    <string name="notification_reminder_48h">Reminder: %1$s has a grooming appointment on %2$s at %3$s.</string>
+    <string name="notification_reminder_2h">Reminder: %1$s\'s grooming appointment is today at %2$s.</string>
+    <string name="notification_ready">%1$s is ready for collection.</string>
+    <string name="notification_missed">We missed %1$s today. Contact us to reschedule.</string>
+
+    <!-- Rebooking Messages -->
+    <string name="rebooking_due_soon_message">%1$s is due for grooming next week.</string>
+    <string name="rebooking_due_today_message">%1$s is due for grooming today.</string>
+    <string name="rebooking_overdue_message">%1$s is overdue for grooming. Book now.</string>
+    <string name="rebooking_interval">Rebooking Interval</string>
+    <string name="weeks_format">%1$d weeks</string>
+
+    <!-- Backup -->
+    <string name="backup_settings">Backup Settings</string>
+    <string name="backup_now">Backup Now</string>
+    <string name="restore">Restore</string>
+    <string name="last_backup">Last backup: %1$s</string>
+    <string name="backup_success">Backup completed successfully</string>
+    <string name="backup_failed">Backup failed</string>
+
+    <!-- General -->
+    <string name="loading">Loading…</string>
+    <string name="error_occurred">An error occurred</string>
+    <string name="retry">Retry</string>
+    <string name="confirm">Confirm</string>
+    <string name="email">Email</string>
+</resources>

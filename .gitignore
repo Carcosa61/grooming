@@ -1,0 +1,47 @@
+# Built application files
+*.apk
+*.ap_
+*.aab
+
+# Files for the ART/Dalvik VM
+*.dex
+
+# Java class files
+*.class
+
+# Generated files
+bin/
+gen/
+out/
+build/
+
+# Gradle files
+.gradle/
+local.properties
+
+# Android Studio
+*.iml
+.idea/
+.DS_Store
+
+# Signing files
+*.jks
+*.keystore
+
+# NDK
+*.o
+*.so
+
+# Crashlytics
+crashlytics.properties
+crashlytics-build.properties
+fabric.properties
+
+# Local configuration
+secrets.properties
+
+# Test outputs
+app/src/androidTest/assets/
+
+# Coverage reports
+coverage/
