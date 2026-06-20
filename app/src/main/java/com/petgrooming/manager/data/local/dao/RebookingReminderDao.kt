@@ -18,17 +18,24 @@ interface RebookingReminderDao {
     @Query("SELECT * FROM rebooking_reminders WHERE petId = :petId")
     suspend fun getReminderByPetId(petId: Long): RebookingReminderEntity?
 
-    // Due within 7 days (due soon)
-    @Query("SELECT * FROM rebooking_reminders WHERE dueDate BETWEEN :today AND :sevenDaysLater AND reminder7DaySent = 0")
+    // Due within 7 days (due soon) - for dashboard display (shows all)
+    @Query("SELECT * FROM rebooking_reminders WHERE dueDate > :today AND dueDate <= :sevenDaysLater")
     fun getPetsDueSoon(today: LocalDate, sevenDaysLater: LocalDate): Flow<List<RebookingReminderEntity>>
 
-    // Due today
-    @Query("SELECT * FROM rebooking_reminders WHERE dueDate = :today AND reminderDueDateSent = 0")
+    // Due today - for dashboard display (shows all)
+    @Query("SELECT * FROM rebooking_reminders WHERE dueDate = :today")
     fun getPetsDueToday(today: LocalDate): Flow<List<RebookingReminderEntity>>
 
-    // Overdue (any past due date)
+    // Overdue (any past due date) - for dashboard display (shows all)
     @Query("SELECT * FROM rebooking_reminders WHERE dueDate < :today")
     fun getPetsOverdue(today: LocalDate): Flow<List<RebookingReminderEntity>>
+    
+    // For notifications - only get unsent reminders
+    @Query("SELECT * FROM rebooking_reminders WHERE dueDate > :today AND dueDate <= :sevenDaysLater AND reminder7DaySent = 0")
+    fun getPetsDueSoonForNotification(today: LocalDate, sevenDaysLater: LocalDate): Flow<List<RebookingReminderEntity>>
+
+    @Query("SELECT * FROM rebooking_reminders WHERE dueDate = :today AND reminderDueDateSent = 0")
+    fun getPetsDueTodayForNotification(today: LocalDate): Flow<List<RebookingReminderEntity>>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertReminder(reminder: RebookingReminderEntity): Long
