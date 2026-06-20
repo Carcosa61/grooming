@@ -104,16 +104,6 @@ dependencies {
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 
-    // Google Drive (for backup)
-    implementation(libs.google.api.services.drive)
-    implementation(libs.google.auth.library.oauth2.http)
-    implementation(libs.play.services.auth)
-    implementation(libs.google.http.client.gson)
-    implementation(libs.google.api.client.android) {
-        exclude(group = "org.apache.httpcomponents")
-        exclude(group = "com.google.guava", module = "guava-jdk5")
-    }
-
     // Testing
     testImplementation(libs.junit)
     testImplementation(libs.kotlinx.coroutines.test)

@@ -1,13 +1,10 @@
 package com.petgrooming.manager.ui.feature.settings
 
-import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount
 import com.petgrooming.manager.R
-import com.petgrooming.manager.data.backup.DriveBackupFile
-import com.petgrooming.manager.data.backup.DriveBackupRepository
-import com.petgrooming.manager.data.backup.GoogleAuthManager
+import com.petgrooming.manager.data.backup.BackupRepository
 import com.petgrooming.manager.data.preferences.UserPreferencesRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -23,12 +20,10 @@ data class SettingsUiState(
 )
 
 data class BackupUiState(
-    val accountEmail: String? = null,
     val lastBackupMillis: Long = 0L,
     val isBackingUp: Boolean = false,
     val isRestoring: Boolean = false,
-    val isLoadingBackups: Boolean = false,
-    val backups: List<DriveBackupFile> = emptyList(),
+    val shareUri: Uri? = null,
     val messageResId: Int? = null,
     val restoreComplete: Boolean = false
 )
@@ -36,8 +31,7 @@ data class BackupUiState(
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
     private val userPreferencesRepository: UserPreferencesRepository,
-    private val authManager: GoogleAuthManager,
-    private val backupRepository: DriveBackupRepository
+    private val backupRepository: BackupRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SettingsUiState())
@@ -49,12 +43,9 @@ class SettingsViewModel @Inject constructor(
     private val _backupState = MutableStateFlow(BackupUiState())
     val backupState: StateFlow<BackupUiState> = _backupState.asStateFlow()
 
-    private var account: GoogleSignInAccount? = null
-
     init {
         loadSettings()
         observeLastBackup()
-        restoreSession()
     }
 
     private fun loadSettings() {
@@ -73,12 +64,6 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    private fun restoreSession() {
-        account = authManager.currentAccount()
-        _backupState.update { it.copy(accountEmail = account?.email) }
-        if (account != null) loadBackups()
-    }
-
     fun setLanguage(languageCode: String) {
         viewModelScope.launch {
             userPreferencesRepository.setLanguage(languageCode)
@@ -90,63 +75,33 @@ class SettingsViewModel @Inject constructor(
         _languageChanged.value = false
     }
 
-    // --- Google Drive backup ---
+    // --- Backup & restore via the system share sheet / file picker ---
 
-    fun signInIntent(): Intent = authManager.signInIntent
-
-    fun onAccountConnected(connectedAccount: GoogleSignInAccount) {
-        account = connectedAccount
-        _backupState.update { it.copy(accountEmail = connectedAccount.email) }
-        loadBackups()
-    }
-
-    fun onSignInFailed() {
-        _backupState.update { it.copy(messageResId = R.string.backup_sign_in_failed) }
-    }
-
-    fun signOut() {
-        authManager.signOut()
-        account = null
-        _backupState.update {
-            it.copy(accountEmail = null, backups = emptyList())
-        }
-    }
-
+    /** Creates a backup archive and, on success, emits a [BackupUiState.shareUri] to launch the share sheet. */
     fun backupNow() {
-        val driveAccount = account?.account ?: return
+        if (_backupState.value.isBackingUp) return
         viewModelScope.launch {
             _backupState.update { it.copy(isBackingUp = true) }
-            val result = backupRepository.backup(driveAccount)
+            val result = backupRepository.createBackup()
             _backupState.update {
                 it.copy(
                     isBackingUp = false,
-                    messageResId = if (result.isSuccess) R.string.backup_success else R.string.backup_failed
-                )
-            }
-            if (result.isSuccess) loadBackups()
-        }
-    }
-
-    fun loadBackups() {
-        val driveAccount = account?.account ?: return
-        viewModelScope.launch {
-            _backupState.update { it.copy(isLoadingBackups = true) }
-            val result = backupRepository.listBackups(driveAccount)
-            _backupState.update {
-                it.copy(
-                    isLoadingBackups = false,
-                    backups = result.getOrDefault(emptyList()),
+                    shareUri = result.getOrNull(),
                     messageResId = if (result.isFailure) R.string.backup_failed else it.messageResId
                 )
             }
         }
     }
 
-    fun restore(fileId: String) {
-        val driveAccount = account?.account ?: return
+    fun consumeShareUri() {
+        _backupState.update { it.copy(shareUri = null) }
+    }
+
+    fun restoreFromUri(uri: Uri) {
+        if (_backupState.value.isRestoring) return
         viewModelScope.launch {
             _backupState.update { it.copy(isRestoring = true) }
-            val result = backupRepository.restore(driveAccount, fileId)
+            val result = backupRepository.restoreFromUri(uri)
             _backupState.update {
                 it.copy(
                     isRestoring = false,

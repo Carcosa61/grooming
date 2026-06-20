@@ -117,31 +117,25 @@
     <string name="weeks_format">%1$d weeks</string>
 
     <!-- Backup -->
-    <string name="backup_settings">Backup Settings</string>
-    <string name="backup_now">Backup Now</string>
+    <string name="backup_settings">Backup &amp; Restore</string>
     <string name="restore">Restore</string>
     <string name="last_backup">Last backup: %1$s</string>
-    <string name="backup_success">Backup completed successfully</string>
-    <string name="backup_failed">Backup failed</string>
-    <string name="backup_drive_title">Back up to Google Drive</string>
-    <string name="backup_drive_subtitle">Save your database and pet photos to your Google Drive.</string>
-    <string name="backup_connect_account">Connect Google account</string>
-    <string name="backup_connected_account">Connected account</string>
-    <string name="backup_sign_out">Sign out</string>
-    <string name="backup_sign_in_failed">Google sign-in failed</string>
+    <string name="backup_failed">Could not create backup</string>
+    <string name="backup_local_title">Back up your data</string>
+    <string name="backup_local_subtitle">Create a backup file with your database and pet photos, then share it to email, Google Drive, or any app. Keep the file safe to restore later.</string>
+    <string name="backup_share">Back up &amp; share</string>
+    <string name="backup_share_chooser">Share backup via</string>
+    <string name="restore_from_file">Restore from file</string>
     <string name="backup_in_progress">Backing up…</string>
     <string name="backup_last_never">Never</string>
-    <string name="backup_select_title">Select a backup to restore</string>
-    <string name="backup_loading">Loading backups…</string>
-    <string name="backup_no_backups">No backups found</string>
     <string name="restore_in_progress">Restoring…</string>
     <string name="restore_confirm_title">Restore this backup?</string>
-    <string name="restore_confirm_message">This will replace all current data and photos with the selected backup. The app will restart to finish.</string>
+    <string name="restore_confirm_message">This will replace all current data and photos with the selected backup file. The app will restart to finish.</string>
     <string name="restore_complete_title">Restore complete</string>
     <string name="restore_complete_message">The app needs to restart to finish restoring your data.</string>
     <string name="restore_restart">Restart now</string>
-    <string name="restore_success">Backup downloaded. Restarting…</string>
-    <string name="restore_failed">Restore failed</string>
+    <string name="restore_success">Backup restored. Restarting…</string>
+    <string name="restore_failed">Could not restore. Please pick a valid backup file.</string>
 
     <!-- General -->
     <string name="loading">Loading…</string>
