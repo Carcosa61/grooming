@@ -19,6 +19,9 @@ build/
 .gradle/
 local.properties
 
+# Kotlin compiler session files
+.kotlin/
+
 # Android Studio
 *.iml
 .idea/
