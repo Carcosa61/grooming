@@ -24,6 +24,8 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -31,10 +33,12 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -45,10 +49,17 @@ import java.util.Locale
 @Composable
 fun CalendarScreen(
     onNavigateToDate: (LocalDate) -> Unit,
+    viewModel: CalendarViewModel = hiltViewModel(),
     modifier: Modifier = Modifier
 ) {
-    var currentMonth by remember { mutableStateOf(YearMonth.now()) }
+    val uiState by viewModel.uiState.collectAsState()
     var selectedDate by remember { mutableStateOf(LocalDate.now()) }
+    val currentMonth = uiState.currentMonth
+    
+    // Reload bookings when month changes
+    LaunchedEffect(currentMonth) {
+        viewModel.loadBookingsForMonth(currentMonth)
+    }
 
     Column(
         modifier = modifier
@@ -75,7 +86,7 @@ fun CalendarScreen(
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    IconButton(onClick = { currentMonth = currentMonth.minusMonths(1) }) {
+                    IconButton(onClick = { viewModel.goToPreviousMonth() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowLeft,
                             contentDescription = "Previous month"
@@ -88,7 +99,7 @@ fun CalendarScreen(
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    IconButton(onClick = { currentMonth = currentMonth.plusMonths(1) }) {
+                    IconButton(onClick = { viewModel.goToNextMonth() }) {
                         Icon(
                             imageVector = Icons.AutoMirrored.Filled.KeyboardArrowRight,
                             contentDescription = "Next month"
@@ -124,17 +135,28 @@ fun CalendarScreen(
 
                 // Calendar grid
                 val daysInMonth = getDaysInMonth(currentMonth)
+                val today = LocalDate.now()
+                
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(7),
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceEvenly
                 ) {
                     items(daysInMonth) { date ->
+                        val hasBooking = uiState.datesWithBookings.contains(date)
+                        val bookingIndicatorColor = when {
+                            !hasBooking -> null
+                            date.isBefore(today) -> Color(0xFF9E9E9E) // Gray for past
+                            date.isEqual(today) -> Color(0xFF4CAF50) // Green for today
+                            else -> Color(0xFF2196F3) // Blue for future
+                        }
+                        
                         CalendarDay(
                             date = date,
                             isSelected = date == selectedDate,
-                            isToday = date == LocalDate.now(),
+                            isToday = date == today,
                             isCurrentMonth = date.month == currentMonth.month,
+                            bookingIndicatorColor = bookingIndicatorColor,
                             onClick = {
                                 if (date.month == currentMonth.month) {
                                     selectedDate = date
@@ -155,11 +177,15 @@ private fun CalendarDay(
     isSelected: Boolean,
     isToday: Boolean,
     isCurrentMonth: Boolean,
+    bookingIndicatorColor: Color?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    // Use booking indicator color for background if there's a booking
+    val hasBooking = bookingIndicatorColor != null && isCurrentMonth
     val backgroundColor = when {
         isSelected -> MaterialTheme.colorScheme.primary
+        hasBooking -> bookingIndicatorColor!!.copy(alpha = 0.7f)
         isToday -> MaterialTheme.colorScheme.primaryContainer
         else -> MaterialTheme.colorScheme.surface
     }
@@ -167,6 +193,7 @@ private fun CalendarDay(
     val textColor = when {
         isSelected -> MaterialTheme.colorScheme.onPrimary
         !isCurrentMonth -> MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f)
+        hasBooking -> Color.White
         isToday -> MaterialTheme.colorScheme.onPrimaryContainer
         else -> MaterialTheme.colorScheme.onSurface
     }

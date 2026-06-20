@@ -24,10 +24,8 @@ class RebookingRepositoryImpl @Inject constructor(
     override fun getPetsDueToday(today: LocalDate): Flow<List<RebookingReminderEntity>> =
         rebookingReminderDao.getPetsDueToday(today)
 
-    override fun getPetsOverdue(today: LocalDate): Flow<List<RebookingReminderEntity>> {
-        val fourteenDaysAgo = today.minusDays(14)
-        return rebookingReminderDao.getPetsOverdue(fourteenDaysAgo)
-    }
+    override fun getPetsOverdue(today: LocalDate): Flow<List<RebookingReminderEntity>> =
+        rebookingReminderDao.getPetsOverdue(today)
 
     override suspend fun getReminderByPetId(petId: Long): RebookingReminderEntity? =
         rebookingReminderDao.getReminderByPetId(petId)

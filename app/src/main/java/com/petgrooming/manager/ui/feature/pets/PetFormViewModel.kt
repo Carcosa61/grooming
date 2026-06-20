@@ -1,0 +1,464 @@
+package com.petgrooming.manager.ui.feature.pets
+
+import androidx.lifecycle.SavedStateHandle
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.petgrooming.manager.data.local.entity.Gender
+import com.petgrooming.manager.data.local.entity.OwnerEntity
+import com.petgrooming.manager.data.local.entity.PetEntity
+import com.petgrooming.manager.data.local.entity.PetType
+import com.petgrooming.manager.domain.repository.CustomBreedRepository
+import com.petgrooming.manager.domain.repository.CustomColorRepository
+import com.petgrooming.manager.domain.repository.OwnerRepository
+import com.petgrooming.manager.domain.repository.PetRepository
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.launch
+import java.time.LocalDate
+import javax.inject.Inject
+
+data class PetFormState(
+    val id: Long = 0,
+    val ownerId: Long = 0,
+    val name: String = "",
+    val petType: PetType = PetType.DOG,
+    val breed: String = "",
+    val customBreedInput: String = "",
+    val showCustomBreedInput: Boolean = false,
+    val availableBreeds: List<String> = emptyList(),
+    val dateOfBirth: LocalDate? = null,
+    val gender: Gender? = null,
+    val weight: String = "",
+    val color: String = "",
+    val customColorInput: String = "",
+    val showCustomColorInput: Boolean = false,
+    val availableColors: List<String> = emptyList(),
+    val allergies: String = "",
+    val medications: String = "",
+    val behaviorNotes: String = "",
+    val notes: String = "",
+    val owners: List<OwnerEntity> = emptyList(),
+    val selectedOwner: OwnerEntity? = null,
+    val isLoading: Boolean = false,
+    val isSaved: Boolean = false,
+    val isDeleted: Boolean = false,
+    val showDeleteConfirmation: Boolean = false,
+    val savedPetId: Long = 0,
+    val error: String? = null,
+    val nameError: String? = null,
+    val breedError: String? = null,
+    val ownerError: String? = null
+)
+
+// Default color lists
+object ColorLists {
+    val commonColors = listOf(
+        "Black",
+        "White",
+        "Brown",
+        "Golden",
+        "Cream",
+        "Gray",
+        "Silver",
+        "Orange/Ginger",
+        "Tan",
+        "Brindle",
+        "Spotted",
+        "Tri-color",
+        "Black & White",
+        "Brown & White",
+        "Merle",
+        "Sable"
+    )
+}
+
+// Default breed lists
+object BreedLists {
+    val dogBreeds = listOf(
+        "Poodle",
+        "Shih Tzu",
+        "Pomeranian",
+        "Chihuahua",
+        "Golden Retriever",
+        "Labrador Retriever",
+        "French Bulldog",
+        "Beagle",
+        "German Shepherd",
+        "Yorkshire Terrier"
+    )
+
+    val catBreeds = listOf(
+        "Persian",
+        "Siamese",
+        "Maine Coon",
+        "British Shorthair",
+        "Scottish Fold",
+        "Bengal",
+        "Ragdoll",
+        "Sphynx",
+        "Abyssinian",
+        "Russian Blue"
+    )
+
+    val otherPetTypes = listOf(
+        "Rabbit",
+        "Hamster",
+        "Guinea Pig",
+        "Bird",
+        "Ferret",
+        "Hedgehog",
+        "Chinchilla",
+        "Turtle",
+        "Fish"
+    )
+
+    fun getDefaultBreedsForType(petType: PetType): List<String> = when (petType) {
+        PetType.DOG -> dogBreeds
+        PetType.CAT -> catBreeds
+        PetType.OTHER -> otherPetTypes
+    }
+}
+
+@HiltViewModel
+class PetFormViewModel @Inject constructor(
+    private val petRepository: PetRepository,
+    private val ownerRepository: OwnerRepository,
+    private val customBreedRepository: CustomBreedRepository,
+    private val customColorRepository: CustomColorRepository,
+    savedStateHandle: SavedStateHandle
+) : ViewModel() {
+
+    private val petId: Long = savedStateHandle.get<Long>("petId") ?: 0
+    private val preselectedOwnerId: Long = savedStateHandle.get<Long>("ownerId") ?: 0
+
+    private val _uiState = MutableStateFlow(PetFormState())
+    val uiState: StateFlow<PetFormState> = _uiState.asStateFlow()
+
+    init {
+        loadOwners()
+        loadBreedsForType(_uiState.value.petType)
+        loadColors()
+        if (petId > 0) {
+            loadPet(petId)
+        }
+    }
+
+    private fun loadBreedsForType(petType: PetType) {
+        viewModelScope.launch {
+            val customBreeds = customBreedRepository.getBreedNamesByType(petType)
+            val defaultBreeds = BreedLists.getDefaultBreedsForType(petType)
+            // Combine default breeds with custom breeds, add "Other" at end
+            val allBreeds = (defaultBreeds + customBreeds).distinct().sorted() + listOf("Other")
+            _uiState.value = _uiState.value.copy(availableBreeds = allBreeds)
+        }
+    }
+    
+    private fun loadColors() {
+        viewModelScope.launch {
+            val customColors = customColorRepository.getAllColorNames()
+            val defaultColors = ColorLists.commonColors
+            // Combine default colors with custom colors, add "Other" at end
+            val allColors = (defaultColors + customColors).distinct().sorted() + listOf("Other")
+            _uiState.value = _uiState.value.copy(availableColors = allColors)
+        }
+    }
+
+    private fun loadOwners() {
+        viewModelScope.launch {
+            ownerRepository.getAllOwners().collect { owners ->
+                // Check for ownerId from editing a pet, or preselected owner, or current selection
+                val ownerIdToMatch = when {
+                    _uiState.value.ownerId > 0 -> _uiState.value.ownerId
+                    preselectedOwnerId > 0 -> preselectedOwnerId
+                    else -> _uiState.value.selectedOwner?.id ?: 0
+                }
+                val selectedOwner = if (ownerIdToMatch > 0) {
+                    owners.find { it.id == ownerIdToMatch }
+                } else {
+                    _uiState.value.selectedOwner
+                }
+                _uiState.value = _uiState.value.copy(
+                    owners = owners,
+                    selectedOwner = selectedOwner,
+                    ownerId = selectedOwner?.id ?: _uiState.value.ownerId
+                )
+            }
+        }
+    }
+
+    private fun loadPet(id: Long) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                petRepository.getPetById(id)?.let { pet ->
+                    val owner = _uiState.value.owners.find { it.id == pet.ownerId }
+                    _uiState.value = _uiState.value.copy(
+                        id = pet.id,
+                        ownerId = pet.ownerId,
+                        name = pet.name,
+                        petType = pet.petType,
+                        breed = pet.breed,
+                        dateOfBirth = pet.dateOfBirth,
+                        gender = pet.gender,
+                        weight = pet.weight?.toString() ?: "",
+                        color = pet.color ?: "",
+                        allergies = pet.allergies ?: "",
+                        medications = pet.medications ?: "",
+                        behaviorNotes = pet.behaviorNotes ?: "",
+                        notes = pet.notes ?: "",
+                        selectedOwner = owner,
+                        isLoading = false
+                    )
+                }
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+
+    fun updateName(name: String) {
+        _uiState.value = _uiState.value.copy(name = name, nameError = null)
+    }
+
+    fun updatePetType(petType: PetType) {
+        // Clear breed and reload breeds when type changes
+        _uiState.value = _uiState.value.copy(
+            petType = petType, 
+            breed = "", 
+            breedError = null,
+            showCustomBreedInput = false,
+            customBreedInput = ""
+        )
+        loadBreedsForType(petType)
+    }
+
+    fun updateBreed(breed: String) {
+        if (breed == "Other") {
+            // Show custom breed input
+            _uiState.value = _uiState.value.copy(
+                showCustomBreedInput = true,
+                breed = "",
+                breedError = null
+            )
+        } else {
+            _uiState.value = _uiState.value.copy(
+                breed = breed, 
+                breedError = null,
+                showCustomBreedInput = false,
+                customBreedInput = ""
+            )
+        }
+    }
+
+    fun updateCustomBreedInput(input: String) {
+        _uiState.value = _uiState.value.copy(customBreedInput = input, breedError = null)
+    }
+
+    fun confirmCustomBreed() {
+        val customBreed = _uiState.value.customBreedInput.trim()
+        if (customBreed.isNotBlank()) {
+            viewModelScope.launch {
+                // Save to custom breeds database
+                customBreedRepository.insertBreed(_uiState.value.petType, customBreed)
+                // Reload breeds to include the new one
+                loadBreedsForType(_uiState.value.petType)
+                // Set the breed
+                _uiState.value = _uiState.value.copy(
+                    breed = customBreed,
+                    showCustomBreedInput = false,
+                    customBreedInput = "",
+                    breedError = null
+                )
+            }
+        }
+    }
+
+    fun cancelCustomBreed() {
+        _uiState.value = _uiState.value.copy(
+            showCustomBreedInput = false,
+            customBreedInput = ""
+        )
+    }
+
+    fun updateOwner(owner: OwnerEntity) {
+        _uiState.value = _uiState.value.copy(
+            selectedOwner = owner,
+            ownerId = owner.id,
+            ownerError = null
+        )
+    }
+
+    fun updateDateOfBirth(date: LocalDate) {
+        _uiState.value = _uiState.value.copy(dateOfBirth = date)
+    }
+
+    fun updateGender(gender: Gender) {
+        _uiState.value = _uiState.value.copy(gender = gender)
+    }
+
+    fun updateWeight(weight: String) {
+        _uiState.value = _uiState.value.copy(weight = weight)
+    }
+
+    fun updateColor(color: String) {
+        if (color == "Other") {
+            // Show custom color input
+            _uiState.value = _uiState.value.copy(
+                showCustomColorInput = true,
+                color = ""
+            )
+        } else {
+            _uiState.value = _uiState.value.copy(
+                color = color,
+                showCustomColorInput = false,
+                customColorInput = ""
+            )
+        }
+    }
+
+    fun updateCustomColorInput(input: String) {
+        _uiState.value = _uiState.value.copy(customColorInput = input)
+    }
+
+    fun confirmCustomColor() {
+        val customColor = _uiState.value.customColorInput.trim()
+        if (customColor.isNotBlank()) {
+            viewModelScope.launch {
+                // Save to custom colors database
+                customColorRepository.insertColor(customColor)
+                // Reload colors to include the new one
+                loadColors()
+                // Set the color
+                _uiState.value = _uiState.value.copy(
+                    color = customColor,
+                    showCustomColorInput = false,
+                    customColorInput = ""
+                )
+            }
+        }
+    }
+
+    fun cancelCustomColor() {
+        _uiState.value = _uiState.value.copy(
+            showCustomColorInput = false,
+            customColorInput = ""
+        )
+    }
+
+    fun updateAllergies(allergies: String) {
+        _uiState.value = _uiState.value.copy(allergies = allergies)
+    }
+
+    fun updateMedications(medications: String) {
+        _uiState.value = _uiState.value.copy(medications = medications)
+    }
+
+    fun updateBehaviorNotes(notes: String) {
+        _uiState.value = _uiState.value.copy(behaviorNotes = notes)
+    }
+
+    fun updateNotes(notes: String) {
+        _uiState.value = _uiState.value.copy(notes = notes)
+    }
+
+    fun save() {
+        val state = _uiState.value
+        
+        var hasError = false
+        var newState = state
+        
+        if (state.name.isBlank()) {
+            newState = newState.copy(nameError = "Pet name is required")
+            hasError = true
+        }
+        if (state.breed.isBlank()) {
+            newState = newState.copy(breedError = "Breed is required")
+            hasError = true
+        }
+        if (state.selectedOwner == null) {
+            newState = newState.copy(ownerError = "Please select an owner")
+            hasError = true
+        }
+        
+        if (hasError) {
+            _uiState.value = newState
+            return
+        }
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true)
+            try {
+                val pet = PetEntity(
+                    id = state.id,
+                    ownerId = state.selectedOwner!!.id,
+                    name = state.name.trim(),
+                    petType = state.petType,
+                    breed = state.breed.trim(),
+                    dateOfBirth = state.dateOfBirth,
+                    gender = state.gender,
+                    weight = state.weight.toFloatOrNull(),
+                    color = state.color.trim().ifBlank { null },
+                    allergies = state.allergies.trim().ifBlank { null },
+                    medications = state.medications.trim().ifBlank { null },
+                    behaviorNotes = state.behaviorNotes.trim().ifBlank { null },
+                    notes = state.notes.trim().ifBlank { null },
+                    updatedAt = System.currentTimeMillis()
+                )
+                
+                val savedId = if (state.id > 0) {
+                    petRepository.updatePet(pet)
+                    state.id
+                } else {
+                    petRepository.insertPet(pet)
+                }
+                
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isSaved = true,
+                    savedPetId = savedId
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+
+    fun showDeleteConfirmation() {
+        _uiState.value = _uiState.value.copy(showDeleteConfirmation = true)
+    }
+
+    fun hideDeleteConfirmation() {
+        _uiState.value = _uiState.value.copy(showDeleteConfirmation = false)
+    }
+
+    fun delete() {
+        val state = _uiState.value
+        if (state.id <= 0) return
+
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isLoading = true, showDeleteConfirmation = false)
+            try {
+                petRepository.getPetById(state.id)?.let { pet ->
+                    petRepository.deletePet(pet)
+                }
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    isDeleted = true
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    isLoading = false,
+                    error = e.message
+                )
+            }
+        }
+    }
+}

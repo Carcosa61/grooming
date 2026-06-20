@@ -1,5 +1,7 @@
 package com.petgrooming.manager.ui.feature.dashboard
 
+import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -26,15 +28,25 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
+import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.ui.theme.StatusColors
+import java.time.format.DateTimeFormatter
+
+import androidx.compose.runtime.LaunchedEffect
 
 @Composable
 fun DashboardScreen(
     onNavigateToBookings: () -> Unit,
     onNavigateToPets: () -> Unit,
+    onNavigateToBookingEdit: (Long) -> Unit = {},
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    
+    // Refresh data when screen becomes visible
+    LaunchedEffect(Unit) {
+        viewModel.loadDashboardData()
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         when {
@@ -54,7 +66,8 @@ fun DashboardScreen(
                 DashboardContent(
                     uiState = uiState,
                     onNavigateToBookings = onNavigateToBookings,
-                    onNavigateToPets = onNavigateToPets
+                    onNavigateToPets = onNavigateToPets,
+                    onBookingLongPress = onNavigateToBookingEdit
                 )
             }
         }
@@ -66,6 +79,7 @@ private fun DashboardContent(
     uiState: DashboardUiState,
     onNavigateToBookings: () -> Unit,
     onNavigateToPets: () -> Unit,
+    onBookingLongPress: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     LazyColumn(
@@ -107,7 +121,7 @@ private fun DashboardContent(
                     )
                 ) {
                     Text(
-                        text = "No bookings today",
+                        text = stringResource(R.string.no_bookings_today),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -115,7 +129,10 @@ private fun DashboardContent(
             }
         } else {
             items(uiState.todaysBookings) { booking ->
-                BookingCard(booking = booking)
+                BookingCard(
+                    booking = booking,
+                    onLongPress = { onBookingLongPress(booking.id) }
+                )
             }
         }
     }
@@ -186,13 +203,23 @@ private fun StatusCard(
     }
 }
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BookingCard(
-    booking: com.petgrooming.manager.data.local.entity.BookingEntity,
+    booking: BookingWithDetails,
+    onLongPress: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val serviceLabel = getServiceTypeLabel(booking.serviceType)
+    
     Card(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { },
+                onLongClick = onLongPress
+            )
     ) {
         Column(
             modifier = Modifier
@@ -200,24 +227,36 @@ private fun BookingCard(
                 .padding(16.dp)
         ) {
             Text(
-                text = "Pet ID: ${booking.petId}",
+                text = "${booking.petName} (${booking.ownerName})",
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.SemiBold
             )
             Spacer(modifier = Modifier.height(4.dp))
             Text(
-                text = "Time: ${booking.appointmentTime}",
+                text = "${stringResource(R.string.time)}: ${booking.appointmentTime.format(timeFormatter)}",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Service: ${booking.serviceType.name.replace("_", " ")}",
+                text = "${stringResource(R.string.service)}: $serviceLabel",
                 style = MaterialTheme.typography.bodyMedium
             )
             Text(
-                text = "Status: ${booking.status.name.replace("_", " ")}",
+                text = "${stringResource(R.string.status)}: ${booking.status.name.replace("_", " ")}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
+    }
+}
+
+@Composable
+private fun getServiceTypeLabel(serviceType: ServiceType): String {
+    return when (serviceType) {
+        ServiceType.BATH -> stringResource(R.string.service_bath)
+        ServiceType.BATH_AND_DRY -> stringResource(R.string.service_bath_dry)
+        ServiceType.FULL_GROOM -> stringResource(R.string.service_full_groom)
+        ServiceType.NAIL_TRIM -> stringResource(R.string.service_nail_trim)
+        ServiceType.EAR_CLEANING -> stringResource(R.string.service_ear_cleaning)
+        ServiceType.CUSTOM -> stringResource(R.string.service_custom)
     }
 }

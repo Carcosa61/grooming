@@ -41,6 +41,10 @@
     <string name="save">บันทึก</string>
     <string name="cancel">ยกเลิก</string>
     <string name="delete">ลบ</string>
+    <string name="confirm_delete">ยืนยันการลบ</string>
+    <string name="delete_pet_message">คุณแน่ใจหรือไม่ว่าต้องการลบสัตว์เลี้ยงนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="delete_owner_message">คุณแน่ใจหรือไม่ว่าต้องการลบเจ้าของนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
+    <string name="delete_booking_message">คุณแน่ใจหรือไม่ว่าต้องการลบการจองนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
 
     <!-- Pet Profile -->
     <string name="pet_profile_title">โปรไฟล์สัตว์เลี้ยง</string>
@@ -67,6 +71,9 @@
     <string name="due_today">ถึงกำหนดวันนี้</string>
     <string name="overdue">เลยกำหนด</string>
     <string name="todays_appointments">นัดหมายวันนี้</string>
+    <string name="time">เวลา</string>
+    <string name="service">บริการ</string>
+    <string name="status">สถานะ</string>
 
     <!-- Calendar -->
     <string name="calendar_daily">รายวัน</string>
@@ -103,4 +110,55 @@
     <string name="retry">ลองอีกครั้ง</string>
     <string name="confirm">ยืนยัน</string>
     <string name="email">อีเมล</string>
+
+    <!-- Forms -->
+    <string name="add_owner">เพิ่มเจ้าของ</string>
+    <string name="edit_owner">แก้ไขข้อมูลเจ้าของ</string>
+    <string name="add_pet">เพิ่มสัตว์เลี้ยง</string>
+    <string name="edit_pet">แก้ไขข้อมูลสัตว์เลี้ยง</string>
+    <string name="select_owner">เลือกเจ้าของ</string>
+    <string name="select_pet">เลือกสัตว์เลี้ยง</string>
+    <string name="email_optional">อีเมล (ไม่บังคับ)</string>
+    <string name="weight_kg">น้ำหนัก (กก.)</string>
+    <string name="groomer_name">ชื่อช่างตัดขน</string>
+    <string name="create_booking">สร้างการจอง</string>
+    <string name="search_pets">ค้นหาสัตว์เลี้ยง</string>
+    <string name="todays_bookings">การจองวันนี้</string>
+    <string name="no_bookings_today">ไม่มีการจองวันนี้</string>
+    <string name="no_bookings_for_date">ไม่มีการจองสำหรับวันนี้</string>
+    <string name="view_all">ดูทั้งหมด</string>
+    <string name="previous_day">วันก่อนหน้า</string>
+    <string name="next_day">วันถัดไป</string>
+
+    <!-- Pet Type -->
+    <string name="pet_type">ประเภทสัตว์เลี้ยง</string>
+    <string name="pet_type_dog">สุนัข</string>
+    <string name="pet_type_cat">แมว</string>
+    <string name="pet_type_other">อื่นๆ</string>
+    <string name="pet_notes">ความคิดเห็น / หมายเหตุ</string>
+    <string name="enter_custom_breed">ป้อนชื่อสายพันธุ์</string>
+    <string name="enter_custom_color">ป้อนสี</string>
+
+    <!-- Settings -->
+    <string name="language_section">ภาษา</string>
+    <string name="language_restart_hint">การเปลี่ยนภาษาจะมีผลทันที</string>
+
+    <!-- Pet Colors -->
+    <string name="color_black">ดำ</string>
+    <string name="color_white">ขาว</string>
+    <string name="color_brown">น้ำตาล</string>
+    <string name="color_golden">ทอง</string>
+    <string name="color_cream">ครีม</string>
+    <string name="color_gray">เทา</string>
+    <string name="color_silver">เงิน</string>
+    <string name="color_orange_ginger">ส้ม/ขิง</string>
+    <string name="color_tan">น้ำตาลอ่อน</string>
+    <string name="color_brindle">ลายเสือ</string>
+    <string name="color_spotted">จุด/ด่าง</string>
+    <string name="color_tricolor">สามสี</string>
+    <string name="color_black_white">ดำ-ขาว</string>
+    <string name="color_brown_white">น้ำตาล-ขาว</string>
+    <string name="color_merle">เมอร์ล</string>
+    <string name="color_sable">เซเบิ้ล</string>
+    <string name="color_other">อื่นๆ</string>
 </resources>

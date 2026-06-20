@@ -35,6 +35,7 @@ data class PetEntity(
     val id: Long = 0,
     val ownerId: Long,
     val name: String,
+    val petType: PetType = PetType.DOG,
     val breed: String,
     val dateOfBirth: LocalDate? = null,
     val gender: Gender? = null,
@@ -43,10 +44,15 @@ data class PetEntity(
     val allergies: String? = null,
     val medications: String? = null,
     val behaviorNotes: String? = null,
+    val notes: String? = null,
     val photoUri: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )
+
+enum class PetType {
+    DOG, CAT, OTHER
+}
 
 enum class Gender {
     MALE, FEMALE
@@ -121,4 +127,27 @@ data class RebookingReminderEntity(
     val reminder7DaySent: Boolean = false,
     val reminderDueDateSent: Boolean = false,
     val reminder14DayOverdueSent: Boolean = false
+)
+
+@Entity(
+    tableName = "custom_breeds",
+    indices = [Index(value = ["petType", "breedName"], unique = true)]
+)
+data class CustomBreedEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val petType: PetType,
+    val breedName: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "custom_colors",
+    indices = [Index(value = ["colorName"], unique = true)]
+)
+data class CustomColorEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val colorName: String,
+    val createdAt: Long = System.currentTimeMillis()
 )

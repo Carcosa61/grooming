@@ -11,19 +11,26 @@ import androidx.compose.material.icons.filled.CalendarMonth
 import androidx.compose.material.icons.filled.Dashboard
 import androidx.compose.material.icons.filled.EventNote
 import androidx.compose.material.icons.filled.Pets
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableIntStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import androidx.navigation.NavDestination.Companion.hierarchy
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.compose.rememberNavController
+import com.petgrooming.manager.ui.navigation.PetGroomingNavHost
+import com.petgrooming.manager.ui.navigation.Routes
 import com.petgrooming.manager.ui.theme.PetGroomingTheme
 import dagger.hilt.android.AndroidEntryPoint
 
@@ -46,84 +53,79 @@ sealed class BottomNavItem(
     val labelResId: Int
 ) {
     data object Dashboard : BottomNavItem(
-        route = "dashboard",
+        route = Routes.DASHBOARD,
         icon = Icons.Default.Dashboard,
         labelResId = R.string.nav_dashboard
     )
     data object Bookings : BottomNavItem(
-        route = "bookings",
+        route = Routes.BOOKINGS,
         icon = Icons.Default.EventNote,
         labelResId = R.string.nav_bookings
     )
     data object Pets : BottomNavItem(
-        route = "pets",
+        route = Routes.PETS,
         icon = Icons.Default.Pets,
         labelResId = R.string.nav_pets
     )
     data object Calendar : BottomNavItem(
-        route = "calendar",
+        route = Routes.CALENDAR,
         icon = Icons.Default.CalendarMonth,
         labelResId = R.string.nav_calendar
+    )
+    data object Settings : BottomNavItem(
+        route = Routes.SETTINGS,
+        icon = Icons.Default.Settings,
+        labelResId = R.string.nav_settings
     )
 }
 
 @Composable
 fun MainScreen() {
+    val navController = rememberNavController()
     val navItems = listOf(
         BottomNavItem.Dashboard,
         BottomNavItem.Bookings,
         BottomNavItem.Pets,
-        BottomNavItem.Calendar
+        BottomNavItem.Calendar,
+        BottomNavItem.Settings
     )
-
-    var selectedIndex by remember { mutableIntStateOf(0) }
 
     Scaffold(
         modifier = Modifier.fillMaxSize(),
         bottomBar = {
+            val navBackStackEntry by navController.currentBackStackEntryAsState()
+            val currentDestination = navBackStackEntry?.destination
+
             NavigationBar {
-                navItems.forEachIndexed { index, item ->
+                navItems.forEach { item ->
                     NavigationBarItem(
-                        selected = selectedIndex == index,
-                        onClick = { selectedIndex = index },
+                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                        onClick = {
+                            navController.navigate(item.route) {
+                                popUpTo(navController.graph.findStartDestination().id) {
+                                    saveState = true
+                                }
+                                launchSingleTop = true
+                                restoreState = true
+                            }
+                        },
                         icon = { Icon(item.icon, contentDescription = null) },
-                        label = { Text(stringResource(item.labelResId)) }
+                        label = { 
+                            Text(
+                                text = stringResource(item.labelResId),
+                                fontSize = 10.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            ) 
+                        }
                     )
                 }
             }
         }
     ) { innerPadding ->
-        // Content will be replaced with NavHost when navigation is set up
-        when (navItems[selectedIndex]) {
-            BottomNavItem.Dashboard -> PlaceholderScreen(
-                title = stringResource(R.string.nav_dashboard),
-                modifier = Modifier.padding(innerPadding)
-            )
-            BottomNavItem.Bookings -> PlaceholderScreen(
-                title = stringResource(R.string.nav_bookings),
-                modifier = Modifier.padding(innerPadding)
-            )
-            BottomNavItem.Pets -> PlaceholderScreen(
-                title = stringResource(R.string.nav_pets),
-                modifier = Modifier.padding(innerPadding)
-            )
-            BottomNavItem.Calendar -> PlaceholderScreen(
-                title = stringResource(R.string.nav_calendar),
-                modifier = Modifier.padding(innerPadding)
-            )
-        }
-    }
-}
-
-@Composable
-fun PlaceholderScreen(title: String, modifier: Modifier = Modifier) {
-    androidx.compose.foundation.layout.Box(
-        modifier = modifier.fillMaxSize(),
-        contentAlignment = androidx.compose.ui.Alignment.Center
-    ) {
-        Text(
-            text = title,
-            style = androidx.compose.material3.MaterialTheme.typography.headlineMedium
+        PetGroomingNavHost(
+            navController = navController,
+            modifier = Modifier.padding(innerPadding)
         )
     }
 }

@@ -3,6 +3,7 @@ package com.petgrooming.manager.data.local
 import androidx.room.TypeConverter
 import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.Gender
+import com.petgrooming.manager.data.local.entity.PetType
 import com.petgrooming.manager.data.local.entity.ServiceType
 import java.time.LocalDate
 import java.time.LocalTime
@@ -25,6 +26,12 @@ class Converters {
 
     @TypeConverter
     fun toGender(genderString: String?): Gender? = genderString?.let { Gender.valueOf(it) }
+
+    @TypeConverter
+    fun fromPetType(petType: PetType?): String? = petType?.name
+
+    @TypeConverter
+    fun toPetType(petTypeString: String?): PetType? = petTypeString?.let { PetType.valueOf(it) }
 
     @TypeConverter
     fun fromServiceType(serviceType: ServiceType?): String? = serviceType?.name
