@@ -106,6 +106,25 @@
     <string name="last_backup">สำรองข้อมูลล่าสุด: %1$s</string>
     <string name="backup_success">สำรองข้อมูลสำเร็จ</string>
     <string name="backup_failed">สำรองข้อมูลล้มเหลว</string>
+    <string name="backup_drive_title">สำรองข้อมูลไปยัง Google Drive</string>
+    <string name="backup_drive_subtitle">บันทึกฐานข้อมูลและรูปภาพสัตว์เลี้ยงไปยัง Google Drive ของคุณ</string>
+    <string name="backup_connect_account">เชื่อมต่อบัญชี Google</string>
+    <string name="backup_connected_account">บัญชีที่เชื่อมต่อ</string>
+    <string name="backup_sign_out">ออกจากระบบ</string>
+    <string name="backup_sign_in_failed">เข้าสู่ระบบ Google ล้มเหลว</string>
+    <string name="backup_in_progress">กำลังสำรองข้อมูล…</string>
+    <string name="backup_last_never">ยังไม่เคย</string>
+    <string name="backup_select_title">เลือกข้อมูลสำรองเพื่อกู้คืน</string>
+    <string name="backup_loading">กำลังโหลดข้อมูลสำรอง…</string>
+    <string name="backup_no_backups">ไม่พบข้อมูลสำรอง</string>
+    <string name="restore_in_progress">กำลังกู้คืน…</string>
+    <string name="restore_confirm_title">กู้คืนข้อมูลสำรองนี้หรือไม่?</string>
+    <string name="restore_confirm_message">การดำเนินการนี้จะแทนที่ข้อมูลและรูปภาพทั้งหมดด้วยข้อมูลสำรองที่เลือก แอปจะรีสตาร์ทเพื่อดำเนินการให้เสร็จ</string>
+    <string name="restore_complete_title">กู้คืนเสร็จสมบูรณ์</string>
+    <string name="restore_complete_message">แอปต้องรีสตาร์ทเพื่อกู้คืนข้อมูลให้เสร็จสมบูรณ์</string>
+    <string name="restore_restart">รีสตาร์ทตอนนี้</string>
+    <string name="restore_success">ดาวน์โหลดข้อมูลสำรองแล้ว กำลังรีสตาร์ท…</string>
+    <string name="restore_failed">กู้คืนล้มเหลว</string>
 
     <!-- General -->
     <string name="loading">กำลังโหลด…</string>

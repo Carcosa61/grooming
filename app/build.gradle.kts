@@ -51,7 +51,11 @@ android {
                 "META-INF/INDEX.LIST",
                 "META-INF/DEPENDENCIES",
                 "META-INF/LICENSE.md",
-                "META-INF/NOTICE.md"
+                "META-INF/NOTICE.md",
+                "META-INF/LICENSE",
+                "META-INF/LICENSE.txt",
+                "META-INF/NOTICE",
+                "META-INF/NOTICE.txt"
             )
         }
     }
@@ -103,6 +107,12 @@ dependencies {
     // Google Drive (for backup)
     implementation(libs.google.api.services.drive)
     implementation(libs.google.auth.library.oauth2.http)
+    implementation(libs.play.services.auth)
+    implementation(libs.google.http.client.gson)
+    implementation(libs.google.api.client.android) {
+        exclude(group = "org.apache.httpcomponents")
+        exclude(group = "com.google.guava", module = "guava-jdk5")
+    }
 
     // Testing
     testImplementation(libs.junit)

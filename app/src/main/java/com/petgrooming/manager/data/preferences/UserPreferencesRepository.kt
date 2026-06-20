@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
+import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -20,6 +21,7 @@ class UserPreferencesRepository @Inject constructor(
 ) {
     private object PreferencesKeys {
         val LANGUAGE = stringPreferencesKey("language")
+        val LAST_BACKUP = longPreferencesKey("last_backup")
     }
 
     val languageFlow: Flow<String> = context.dataStore.data.map { preferences ->
@@ -29,6 +31,16 @@ class UserPreferencesRepository @Inject constructor(
     suspend fun setLanguage(languageCode: String) {
         context.dataStore.edit { preferences ->
             preferences[PreferencesKeys.LANGUAGE] = languageCode
+        }
+    }
+
+    val lastBackupFlow: Flow<Long> = context.dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.LAST_BACKUP] ?: 0L
+    }
+
+    suspend fun setLastBackup(timestamp: Long) {
+        context.dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_BACKUP] = timestamp
         }
     }
 
