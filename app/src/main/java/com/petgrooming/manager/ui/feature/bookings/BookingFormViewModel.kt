@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -19,6 +20,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
+
+private const val TAG = "BookingFormViewModel"
 
 data class BookingFormState(
     val id: Long = 0,
@@ -235,12 +238,15 @@ class BookingFormViewModel @Inject constructor(
     }
     
     private suspend fun updateRebookingReminder(booking: BookingEntity) {
+        Log.d(TAG, "updateRebookingReminder called for petId=${booking.petId}, appointmentDate=${booking.appointmentDate}")
         val existingReminder = rebookingRepository.getReminderByPetId(booking.petId)
         val intervalWeeks = existingReminder?.intervalWeeks ?: 8
         val newDueDate = booking.appointmentDate.plusWeeks(intervalWeeks.toLong())
+        Log.d(TAG, "Calculated newDueDate=$newDueDate (intervalWeeks=$intervalWeeks)")
         
         if (existingReminder != null) {
             // Update existing reminder
+            Log.d(TAG, "Updating existing reminder id=${existingReminder.id}")
             rebookingRepository.updateReminder(
                 existingReminder.copy(
                     lastGroomDate = booking.appointmentDate,
@@ -252,6 +258,7 @@ class BookingFormViewModel @Inject constructor(
             )
         } else {
             // Create new reminder
+            Log.d(TAG, "Creating new reminder for petId=${booking.petId}")
             rebookingRepository.insertReminder(
                 RebookingReminderEntity(
                     petId = booking.petId,
@@ -261,6 +268,7 @@ class BookingFormViewModel @Inject constructor(
                 )
             )
         }
+        Log.d(TAG, "Rebooking reminder saved successfully")
     }
 
     fun showDeleteConfirmation() {

@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.dashboard
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.data.local.entity.BookingEntity
@@ -14,10 +15,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.LocalTime
 import javax.inject.Inject
+
+private const val TAG = "DashboardViewModel"
 
 data class BookingWithDetails(
     val id: Long,
@@ -64,6 +68,14 @@ class DashboardViewModel @Inject constructor(
 
             try {
                 val today = LocalDate.now()
+                Log.d(TAG, "Loading dashboard data for today: $today")
+                
+                // First, log all reminders in database (snapshot)
+                val allReminders = rebookingRepository.getAllReminders().first()
+                Log.d(TAG, "Total rebooking reminders in DB: ${allReminders.size}")
+                allReminders.forEach { r ->
+                    Log.d(TAG, "Reminder: id=${r.id}, petId=${r.petId}, dueDate=${r.dueDate}, lastGroom=${r.lastGroomDate}")
+                }
 
                 combine(
                     bookingRepository.getBookingsByDate(today),
@@ -71,6 +83,11 @@ class DashboardViewModel @Inject constructor(
                     rebookingRepository.getPetsDueToday(today),
                     rebookingRepository.getPetsOverdue(today)
                 ) { todaysBookings, dueSoon, dueToday, overdue ->
+                    Log.d(TAG, "Dashboard data received - DueSoon: ${dueSoon.size}, DueToday: ${dueToday.size}, Overdue: ${overdue.size}")
+                    dueSoon.forEach { Log.d(TAG, "DueSoon pet: petId=${it.petId}, dueDate=${it.dueDate}") }
+                    dueToday.forEach { Log.d(TAG, "DueToday pet: petId=${it.petId}, dueDate=${it.dueDate}") }
+                    overdue.forEach { Log.d(TAG, "Overdue pet: petId=${it.petId}, dueDate=${it.dueDate}") }
+                    
                     // Map bookings to BookingWithDetails
                     val bookingsWithDetails = todaysBookings.map { booking ->
                         mapBookingToDetails(booking)
@@ -85,9 +102,11 @@ class DashboardViewModel @Inject constructor(
                         dueSoonPets = dueSoon
                     )
                 }.collect { state ->
+                    Log.d(TAG, "Updating UI state: dueSoon=${state.dueSoonCount}, dueToday=${state.dueTodayCount}, overdue=${state.overdueCount}")
                     _uiState.value = state
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error loading dashboard data", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = e.message
