@@ -1,5 +1,7 @@
 package com.petgrooming.manager.ui.feature.pets
 
+import android.content.Context
+import android.net.Uri
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -7,11 +9,13 @@ import com.petgrooming.manager.data.local.entity.Gender
 import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.PetType
+import com.petgrooming.manager.data.util.ImageStorage
 import com.petgrooming.manager.domain.repository.CustomBreedRepository
 import com.petgrooming.manager.domain.repository.CustomColorRepository
 import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -39,6 +43,8 @@ data class PetFormState(
     val medications: String = "",
     val behaviorNotes: String = "",
     val notes: String = "",
+    val photoUri: String? = null,
+    val isPhotoProcessing: Boolean = false,
     val owners: List<OwnerEntity> = emptyList(),
     val selectedOwner: OwnerEntity? = null,
     val isLoading: Boolean = false,
@@ -123,6 +129,7 @@ object BreedLists {
 
 @HiltViewModel
 class PetFormViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val petRepository: PetRepository,
     private val ownerRepository: OwnerRepository,
     private val customBreedRepository: CustomBreedRepository,
@@ -208,6 +215,7 @@ class PetFormViewModel @Inject constructor(
                         medications = pet.medications ?: "",
                         behaviorNotes = pet.behaviorNotes ?: "",
                         notes = pet.notes ?: "",
+                        photoUri = pet.photoUri,
                         selectedOwner = owner,
                         isLoading = false
                     )
@@ -223,6 +231,21 @@ class PetFormViewModel @Inject constructor(
 
     fun updateName(name: String) {
         _uiState.value = _uiState.value.copy(name = name, nameError = null)
+    }
+
+    fun onPhotoSelected(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isPhotoProcessing = true)
+            val path = ImageStorage.saveImage(context, uri)
+            _uiState.value = _uiState.value.copy(
+                photoUri = path ?: _uiState.value.photoUri,
+                isPhotoProcessing = false
+            )
+        }
+    }
+
+    fun onPhotoRemoved() {
+        _uiState.value = _uiState.value.copy(photoUri = null)
     }
 
     fun updatePetType(petType: PetType) {
@@ -407,6 +430,7 @@ class PetFormViewModel @Inject constructor(
                     medications = state.medications.trim().ifBlank { null },
                     behaviorNotes = state.behaviorNotes.trim().ifBlank { null },
                     notes = state.notes.trim().ifBlank { null },
+                    photoUri = state.photoUri,
                     updatedAt = System.currentTimeMillis()
                 )
                 

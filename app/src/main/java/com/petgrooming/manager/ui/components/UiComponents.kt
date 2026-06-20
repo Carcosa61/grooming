@@ -88,7 +88,7 @@ fun PetAvatar(
     val bgColor = avatarColorFor(name)
     if (photoUri != null) {
         AsyncImage(
-            model = photoUri,
+            model = photoModel(photoUri),
             contentDescription = name,
             modifier = modifier
                 .size(size.dp)

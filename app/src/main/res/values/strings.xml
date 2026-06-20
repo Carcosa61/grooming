@@ -56,6 +56,12 @@
     <!-- Actions -->
     <string name="create_booking">Create Booking</string>
     <string name="add_pet">Add Pet</string>
+    <!-- Photos -->
+    <string name="remove_photo">Remove</string>
+    <string name="pet_photo">Pet photo</string>
+    <string name="grooming_photos">Grooming photos</string>
+    <string name="photo_before">Before</string>
+    <string name="photo_after">After</string>
     <string name="search_pets">Search Pets</string>
     <string name="todays_bookings">Today\'s Bookings</string>
     <string name="no_bookings_today">No bookings today</string>

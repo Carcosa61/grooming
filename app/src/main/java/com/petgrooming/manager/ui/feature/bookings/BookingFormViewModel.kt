@@ -1,5 +1,7 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import android.content.Context
+import android.net.Uri
 import android.util.Log
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,10 +11,12 @@ import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
 import com.petgrooming.manager.data.local.entity.ServiceType
+import com.petgrooming.manager.data.util.ImageStorage
 import com.petgrooming.manager.domain.repository.BookingRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import com.petgrooming.manager.domain.repository.RebookingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -33,6 +37,10 @@ data class BookingFormState(
     val originalStatus: BookingStatus = BookingStatus.SCHEDULED,
     val groomerName: String = "",
     val notes: String = "",
+    val beforePhotoUri: String? = null,
+    val afterPhotoUri: String? = null,
+    val isBeforePhotoProcessing: Boolean = false,
+    val isAfterPhotoProcessing: Boolean = false,
     val pets: List<PetWithOwner> = emptyList(),
     val selectedPet: PetWithOwner? = null,
     val isLoading: Boolean = false,
@@ -53,6 +61,7 @@ data class PetWithOwner(
 
 @HiltViewModel
 class BookingFormViewModel @Inject constructor(
+    @ApplicationContext private val context: Context,
     private val bookingRepository: BookingRepository,
     private val petRepository: PetRepository,
     private val rebookingRepository: RebookingRepository,
@@ -128,6 +137,8 @@ class BookingFormViewModel @Inject constructor(
                         originalStatus = booking.status,
                         groomerName = booking.groomerName ?: "",
                         notes = booking.notes ?: "",
+                        beforePhotoUri = booking.beforePhotoUri,
+                        afterPhotoUri = booking.afterPhotoUri,
                         selectedPet = petWithOwner,
                         isLoading = false
                     )
@@ -176,6 +187,36 @@ class BookingFormViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(status = status)
     }
 
+    fun onBeforePhotoSelected(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isBeforePhotoProcessing = true)
+            val path = ImageStorage.saveImage(context, uri)
+            _uiState.value = _uiState.value.copy(
+                beforePhotoUri = path ?: _uiState.value.beforePhotoUri,
+                isBeforePhotoProcessing = false
+            )
+        }
+    }
+
+    fun onBeforePhotoRemoved() {
+        _uiState.value = _uiState.value.copy(beforePhotoUri = null)
+    }
+
+    fun onAfterPhotoSelected(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isAfterPhotoProcessing = true)
+            val path = ImageStorage.saveImage(context, uri)
+            _uiState.value = _uiState.value.copy(
+                afterPhotoUri = path ?: _uiState.value.afterPhotoUri,
+                isAfterPhotoProcessing = false
+            )
+        }
+    }
+
+    fun onAfterPhotoRemoved() {
+        _uiState.value = _uiState.value.copy(afterPhotoUri = null)
+    }
+
     fun save() {
         val state = _uiState.value
         
@@ -208,6 +249,8 @@ class BookingFormViewModel @Inject constructor(
                     status = state.status,
                     groomerName = state.groomerName.trim().ifBlank { null },
                     notes = state.notes.trim().ifBlank { null },
+                    beforePhotoUri = state.beforePhotoUri,
+                    afterPhotoUri = state.afterPhotoUri,
                     updatedAt = System.currentTimeMillis()
                 )
                 

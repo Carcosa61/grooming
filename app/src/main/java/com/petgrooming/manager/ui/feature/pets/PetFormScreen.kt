@@ -41,6 +41,7 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
 import com.petgrooming.manager.data.local.entity.Gender
 import com.petgrooming.manager.data.local.entity.PetType
+import com.petgrooming.manager.ui.components.AvatarPhotoPicker
 import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormButtons
@@ -157,6 +158,16 @@ fun PetFormScreen(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
+                // Pet Photo
+                AvatarPhotoPicker(
+                    name = uiState.name,
+                    photoUri = uiState.photoUri,
+                    onPhotoSelected = viewModel::onPhotoSelected,
+                    onPhotoRemoved = viewModel::onPhotoRemoved
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
                 // Owner Selection
                 Row(
                     modifier = Modifier.fillMaxWidth(),

@@ -40,6 +40,7 @@ import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormButtons
 import com.petgrooming.manager.ui.components.FormTextField
+import com.petgrooming.manager.ui.components.PhotoPickerField
 import com.petgrooming.manager.ui.components.TimePickerField
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -242,6 +243,32 @@ fun BookingFormScreen(
                     singleLine = false,
                     maxLines = 4
                 )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Grooming photos (before / after)
+                Text(
+                    text = stringResource(R.string.grooming_photos),
+                    style = MaterialTheme.typography.titleSmall
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Row(modifier = Modifier.fillMaxWidth()) {
+                    PhotoPickerField(
+                        label = stringResource(R.string.photo_before),
+                        photoUri = uiState.beforePhotoUri,
+                        onPhotoSelected = viewModel::onBeforePhotoSelected,
+                        onPhotoRemoved = viewModel::onBeforePhotoRemoved,
+                        modifier = Modifier.weight(1f)
+                    )
+                    Spacer(modifier = Modifier.width(16.dp))
+                    PhotoPickerField(
+                        label = stringResource(R.string.photo_after),
+                        photoUri = uiState.afterPhotoUri,
+                        onPhotoSelected = viewModel::onAfterPhotoSelected,
+                        onPhotoRemoved = viewModel::onAfterPhotoRemoved,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
 
                 if (uiState.error != null) {
                     Spacer(modifier = Modifier.height(16.dp))
