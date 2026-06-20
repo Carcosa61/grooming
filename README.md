@@ -1,5 +1,7 @@
 # Pet Grooming Manager
 
+[![GitHub](https://img.shields.io/badge/GitHub-Carcosa61%2Fgrooming-blue?logo=github)](https://github.com/Carcosa61/grooming)
+
 Android app for managing pet grooming appointments, built with Kotlin and Jetpack Compose.
 
 ## Development Environment (VS Code)
