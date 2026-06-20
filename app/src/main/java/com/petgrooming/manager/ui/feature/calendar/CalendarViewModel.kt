@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.calendar
 
+import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.domain.repository.BookingRepository
@@ -11,6 +12,8 @@ import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.YearMonth
 import javax.inject.Inject
+
+private const val TAG = "CalendarViewModel"
 
 data class CalendarUiState(
     val isLoading: Boolean = false,
@@ -28,11 +31,13 @@ class CalendarViewModel @Inject constructor(
     val uiState: StateFlow<CalendarUiState> = _uiState.asStateFlow()
 
     init {
+        Log.d(TAG, "CalendarViewModel init")
         loadBookingsForMonth(YearMonth.now())
     }
 
     fun loadBookingsForMonth(yearMonth: YearMonth) {
         viewModelScope.launch {
+            Log.d(TAG, "Loading bookings for month: $yearMonth")
             _uiState.value = _uiState.value.copy(
                 isLoading = true,
                 currentMonth = yearMonth,
@@ -42,15 +47,18 @@ class CalendarViewModel @Inject constructor(
             try {
                 val startDate = yearMonth.atDay(1)
                 val endDate = yearMonth.atEndOfMonth()
+                Log.d(TAG, "Date range: $startDate to $endDate")
 
                 bookingRepository.getBookingsBetweenDates(startDate, endDate).collect { bookings ->
                     val datesWithBookings = bookings.map { it.appointmentDate }.toSet()
+                    Log.d(TAG, "Found ${bookings.size} bookings, dates: $datesWithBookings")
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
                         datesWithBookings = datesWithBookings
                     )
                 }
             } catch (e: Exception) {
+                Log.e(TAG, "Error loading bookings", e)
                 _uiState.value = _uiState.value.copy(
                     isLoading = false,
                     error = e.message

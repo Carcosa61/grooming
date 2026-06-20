@@ -31,6 +31,7 @@ import com.petgrooming.manager.R
 import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.ui.theme.StatusColors
 import java.time.format.DateTimeFormatter
+import java.time.LocalDate
 
 import androidx.compose.runtime.LaunchedEffect
 
@@ -130,6 +131,40 @@ private fun DashboardContent(
         } else {
             items(uiState.todaysBookings) { booking ->
                 BookingCard(
+                    booking = booking,
+                    onLongPress = { onBookingLongPress(booking.id) }
+                )
+            }
+        }
+
+        // Upcoming Bookings section (next 7 days)
+        item {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.upcoming_bookings),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.SemiBold
+            )
+        }
+
+        if (uiState.upcomingBookings.isEmpty()) {
+            item {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                ) {
+                    Text(
+                        text = stringResource(R.string.no_upcoming_bookings),
+                        modifier = Modifier.padding(16.dp),
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                }
+            }
+        } else {
+            items(uiState.upcomingBookings) { booking ->
+                UpcomingBookingCard(
                     booking = booking,
                     onLongPress = { onBookingLongPress(booking.id) }
                 )
@@ -244,6 +279,62 @@ private fun BookingCard(
                 text = "${stringResource(R.string.status)}: ${booking.status.name.replace("_", " ")}",
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun UpcomingBookingCard(
+    booking: UpcomingBookingWithDetails,
+    onLongPress: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val dateFormatter = DateTimeFormatter.ofPattern("EEE, d MMM")
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val serviceLabel = getServiceTypeLabel(booking.serviceType)
+    
+    Card(
+        modifier = modifier
+            .fillMaxWidth()
+            .combinedClickable(
+                onClick = { },
+                onLongClick = onLongPress
+            ),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
+        )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "${booking.petName} (${booking.ownerName})",
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.SemiBold
+                )
+                Text(
+                    text = booking.appointmentDate.format(dateFormatter),
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.Bold
+                )
+            }
+            Spacer(modifier = Modifier.height(4.dp))
+            Text(
+                text = "${stringResource(R.string.time)}: ${booking.appointmentTime.format(timeFormatter)}",
+                style = MaterialTheme.typography.bodyMedium
+            )
+            Text(
+                text = "${stringResource(R.string.service)}: $serviceLabel",
+                style = MaterialTheme.typography.bodyMedium
             )
         }
     }

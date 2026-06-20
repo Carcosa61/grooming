@@ -125,6 +125,8 @@
     <string name="search_pets">ค้นหาสัตว์เลี้ยง</string>
     <string name="todays_bookings">การจองวันนี้</string>
     <string name="no_bookings_today">ไม่มีการจองวันนี้</string>
+    <string name="upcoming_bookings">การจองที่จะมาถึง (7 วันข้างหน้า)</string>
+    <string name="no_upcoming_bookings">ไม่มีการจองที่จะมาถึง</string>
     <string name="no_bookings_for_date">ไม่มีการจองสำหรับวันนี้</string>
     <string name="view_all">ดูทั้งหมด</string>
     <string name="previous_day">วันก่อนหน้า</string>
