@@ -12,10 +12,11 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.SearchOff
 import androidx.compose.material3.Card
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FloatingActionButton
@@ -29,15 +30,14 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
-import coil.compose.AsyncImage
 import com.petgrooming.manager.R
 import com.petgrooming.manager.data.local.entity.PetEntity
+import com.petgrooming.manager.ui.components.EmptyState
+import com.petgrooming.manager.ui.components.PetAvatar
 
 @Composable
 fun PetsScreen(
@@ -129,17 +129,17 @@ private fun PetsContent(
 
         if (uiState.pets.isEmpty()) {
             item {
-                Card(
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (uiState.searchQuery.isNotEmpty()) {
-                            "No pets found matching \"${uiState.searchQuery}\""
-                        } else {
-                            "No pets registered yet"
-                        },
-                        modifier = Modifier.padding(16.dp),
-                        style = MaterialTheme.typography.bodyLarge
+                if (uiState.searchQuery.isNotEmpty()) {
+                    EmptyState(
+                        icon = Icons.Default.SearchOff,
+                        title = stringResource(R.string.empty_no_pets_search_title),
+                        subtitle = stringResource(R.string.empty_no_pets_search_subtitle)
+                    )
+                } else {
+                    EmptyState(
+                        icon = Icons.Default.Pets,
+                        title = stringResource(R.string.empty_no_pets_title),
+                        subtitle = stringResource(R.string.empty_no_pets_subtitle)
                     )
                 }
             }
@@ -171,29 +171,7 @@ private fun PetListItem(
             horizontalArrangement = Arrangement.spacedBy(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            if (pet.photoUri != null) {
-                AsyncImage(
-                    model = pet.photoUri,
-                    contentDescription = pet.name,
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape),
-                    contentScale = ContentScale.Crop
-                )
-            } else {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .clip(CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Text(
-                        text = pet.name.firstOrNull()?.uppercase() ?: "?",
-                        style = MaterialTheme.typography.headlineSmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
+            PetAvatar(name = pet.name, photoUri = pet.photoUri, size = 56)
 
             Column(modifier = Modifier.weight(1f)) {
                 Text(

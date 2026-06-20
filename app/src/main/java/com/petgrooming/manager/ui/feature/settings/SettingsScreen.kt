@@ -19,7 +19,9 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -41,6 +43,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.os.LocaleListCompat
 import androidx.hilt.navigation.compose.hiltViewModel
+import com.petgrooming.manager.BuildConfig
 import com.petgrooming.manager.R
 import com.petgrooming.manager.data.preferences.UserPreferencesRepository
 
@@ -124,6 +127,42 @@ fun SettingsScreen(
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp)
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // About Section
+            Text(
+                text = stringResource(R.string.settings_about),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(16.dp)
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.app_name)) },
+                    supportingContent = { Text(stringResource(R.string.settings_version, BuildConfig.VERSION_NAME)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Pets,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    colors = androidx.compose.material3.ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    )
+                )
+            }
+
+            Spacer(modifier = Modifier.height(24.dp))
         }
     }
 }

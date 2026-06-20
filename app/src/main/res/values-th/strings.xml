@@ -90,9 +90,12 @@
     <string name="notification_missed">%1$s ไม่ได้มาตามนัดวันนี้ กรุณาติดต่อเพื่อนัดใหม่</string>
 
     <!-- Rebooking -->
-    <string name="rebooking_due_soon">%1$s ใกล้ถึงกำหนดตัดขนสัปดาห์หน้า</string>
-    <string name="rebooking_due_today">%1$s ถึงกำหนดตัดขนวันนี้</string>
-    <string name="rebooking_overdue">%1$s เลยกำหนดตัดขนแล้ว จองเลย!</string>
+    <string name="rebooking_due_soon">จองใหม่เร็วๆ นี้</string>
+    <string name="rebooking_due_today">จองใหม่วันนี้</string>
+    <string name="rebooking_overdue">เลยกำหนดจองใหม่</string>
+    <string name="rebooking_due_soon_message">%1$s ใกล้ถึงกำหนดตัดขนสัปดาห์หน้า</string>
+    <string name="rebooking_due_today_message">%1$s ถึงกำหนดตัดขนวันนี้</string>
+    <string name="rebooking_overdue_message">%1$s เลยกำหนดตัดขนแล้ว จองเลย!</string>
     <string name="rebooking_interval">ช่วงเวลานัดครั้งต่อไป</string>
     <string name="weeks_format">%1$d สัปดาห์</string>
 
@@ -163,4 +166,30 @@
     <string name="color_merle">เมอร์ล</string>
     <string name="color_sable">เซเบิ้ล</string>
     <string name="color_other">อื่นๆ</string>
+
+    <!-- Dashboard Hero & Summary -->
+    <string name="greeting_morning">สวัสดีตอนเช้า</string>
+    <string name="greeting_afternoon">สวัสดีตอนบ่าย</string>
+    <string name="greeting_evening">สวัสดีตอนเย็น</string>
+    <string name="dashboard_summary_none">วันนี้ไม่มีนัดหมาย</string>
+    <string name="dashboard_summary_one">วันนี้คุณมีนัดหมาย 1 รายการ</string>
+    <string name="dashboard_summary_many">วันนี้คุณมีนัดหมาย %1$d รายการ</string>
+    <string name="stat_today">วันนี้</string>
+    <string name="stat_upcoming">ที่จะมาถึง</string>
+    <string name="stat_in_salon">อยู่ในร้าน</string>
+
+    <!-- Empty States -->
+    <string name="empty_no_bookings_title">ไม่มีการจองวันนี้</string>
+    <string name="empty_no_bookings_subtitle">พักผ่อนสักครู่ หรือสร้างการจองใหม่</string>
+    <string name="empty_no_upcoming_title">ไม่มีนัดที่จะมาถึง</string>
+    <string name="empty_no_upcoming_subtitle">ไม่มีการจองใน 7 วันข้างหน้า</string>
+    <string name="empty_no_pets_title">ยังไม่มีสัตว์เลี้ยง</string>
+    <string name="empty_no_pets_subtitle">เพิ่มลูกค้าขนปุยตัวแรกเพื่อเริ่มต้น</string>
+    <string name="empty_no_pets_search_title">ไม่พบรายการที่ตรงกัน</string>
+    <string name="empty_no_pets_search_subtitle">ลองใช้ชื่อหรือคำค้นหาอื่น</string>
+    <string name="add_booking">เพิ่มการจอง</string>
+
+    <!-- Settings Sections -->
+    <string name="settings_about">เกี่ยวกับ</string>
+    <string name="settings_version">เวอร์ชัน %1$s</string>
 </resources>

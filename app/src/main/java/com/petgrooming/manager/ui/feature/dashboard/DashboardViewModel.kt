@@ -30,7 +30,8 @@ data class BookingWithDetails(
     val ownerName: String,
     val appointmentTime: LocalTime,
     val serviceType: com.petgrooming.manager.data.local.entity.ServiceType,
-    val status: com.petgrooming.manager.data.local.entity.BookingStatus
+    val status: com.petgrooming.manager.data.local.entity.BookingStatus,
+    val photoUri: String? = null
 )
 
 data class UpcomingBookingWithDetails(
@@ -41,7 +42,8 @@ data class UpcomingBookingWithDetails(
     val appointmentDate: LocalDate,
     val appointmentTime: LocalTime,
     val serviceType: com.petgrooming.manager.data.local.entity.ServiceType,
-    val status: com.petgrooming.manager.data.local.entity.BookingStatus
+    val status: com.petgrooming.manager.data.local.entity.BookingStatus,
+    val photoUri: String? = null
 )
 
 data class DashboardUiState(
@@ -154,7 +156,8 @@ class DashboardViewModel @Inject constructor(
             ownerName = owner?.name ?: "Unknown",
             appointmentTime = booking.appointmentTime,
             serviceType = booking.serviceType,
-            status = booking.status
+            status = booking.status,
+            photoUri = pet?.photoUri
         )
     }
     
@@ -170,7 +173,8 @@ class DashboardViewModel @Inject constructor(
             appointmentDate = booking.appointmentDate,
             appointmentTime = booking.appointmentTime,
             serviceType = booking.serviceType,
-            status = booking.status
+            status = booking.status,
+            photoUri = pet?.photoUri
         )
     }
 }

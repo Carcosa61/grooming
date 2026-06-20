@@ -54,7 +54,8 @@ fun PetGroomingNavHost(
                 onNavigateToPets = { navController.navigate(Routes.PETS) },
                 onNavigateToBookingEdit = { bookingId ->
                     navController.navigate(Routes.bookingEdit(bookingId))
-                }
+                },
+                onNavigateToCreateBooking = { navController.navigate(Routes.BOOKING_CREATE) }
             )
         }
 

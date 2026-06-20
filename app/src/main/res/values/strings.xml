@@ -172,4 +172,30 @@
     <string name="color_merle">Merle</string>
     <string name="color_sable">Sable</string>
     <string name="color_other">Other</string>
+
+    <!-- Dashboard Hero & Summary -->
+    <string name="greeting_morning">Good morning</string>
+    <string name="greeting_afternoon">Good afternoon</string>
+    <string name="greeting_evening">Good evening</string>
+    <string name="dashboard_summary_none">No appointments scheduled today</string>
+    <string name="dashboard_summary_one">You have 1 appointment today</string>
+    <string name="dashboard_summary_many">You have %1$d appointments today</string>
+    <string name="stat_today">Today</string>
+    <string name="stat_upcoming">Upcoming</string>
+    <string name="stat_in_salon">In Salon</string>
+
+    <!-- Empty States -->
+    <string name="empty_no_bookings_title">No bookings today</string>
+    <string name="empty_no_bookings_subtitle">Enjoy the quiet, or create a new booking.</string>
+    <string name="empty_no_upcoming_title">Nothing upcoming</string>
+    <string name="empty_no_upcoming_subtitle">No bookings in the next 7 days.</string>
+    <string name="empty_no_pets_title">No pets yet</string>
+    <string name="empty_no_pets_subtitle">Add your first furry client to get started.</string>
+    <string name="empty_no_pets_search_title">No matches found</string>
+    <string name="empty_no_pets_search_subtitle">Try a different name or search term.</string>
+    <string name="add_booking">Add Booking</string>
+
+    <!-- Settings Sections -->
+    <string name="settings_about">About</string>
+    <string name="settings_version">Version %1$s</string>
 </resources>
