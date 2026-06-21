@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- App palette, mirrors the Compose color scheme in ui/theme/Color.kt
+         so non-Compose Activities (e.g. the image cropper) match the app. -->
+    <color name="cropper_primary">#FF00897B</color>
+    <color name="cropper_primary_dark">#FF00695C</color>
+    <color name="cropper_accent">#FFFF7043</color>
+    <color name="cropper_on_primary">#FFFFFFFF</color>
+</resources>

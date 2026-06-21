@@ -2,6 +2,13 @@
 <resources>
     <style name="Theme.PetGroomingManager" parent="android:Theme.Material.Light.NoActionBar" />
 
-    <!-- CropImageActivity (image cropper) requires a Theme.AppCompat descendant. -->
-    <style name="Theme.PetGroomingManager.Cropper" parent="Theme.AppCompat.Light.NoActionBar" />
+    <!-- CropImageActivity (image cropper) requires a Theme.AppCompat descendant.
+         It must have an action bar so the crop/done menu action is visible.
+         Colors mirror the app's Compose palette so the cropper matches the app. -->
+    <style name="Theme.PetGroomingManager.Cropper" parent="Theme.AppCompat.Light.DarkActionBar">
+        <item name="colorPrimary">@color/cropper_primary</item>
+        <item name="colorPrimaryDark">@color/cropper_primary_dark</item>
+        <item name="colorAccent">@color/cropper_accent</item>
+        <item name="android:statusBarColor">@color/cropper_primary_dark</item>
+    </style>
 </resources>
