@@ -168,6 +168,19 @@
     <string name="weight_kg">Weight (kg)</string>
     <string name="groomer_name">Groomer Name</string>
 
+    <!-- Customer &amp; pet picker / onboarding -->
+    <string name="customer_and_pet">Customer &amp; Pet</string>
+    <string name="select_customer_pet">Select customer &amp; pet</string>
+    <string name="new_customer_and_pet">New customer &amp; pet</string>
+    <string name="add_pet_for">Add pet for %1$s</string>
+    <string name="no_customers_yet">No customers yet. Add your first customer &amp; pet to get started.</string>
+    <string name="no_matches_found">No matches found</string>
+    <string name="owner_details">Customer Details</string>
+    <string name="owner_not_found">Customer not found</string>
+    <string name="pets_count">Pets (%1$d)</string>
+    <string name="no_pets_for_owner">No pets yet. Tap “Add Pet” to add one.</string>
+    <string name="book">Book</string>
+
     <!-- Pet Type -->
     <string name="pet_type">Pet Type</string>
     <string name="pet_type_dog">Dog</string>

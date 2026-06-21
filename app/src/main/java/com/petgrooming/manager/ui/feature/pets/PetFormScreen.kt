@@ -83,9 +83,19 @@ fun PetFormScreen(
     onNavigateBack: () -> Unit,
     onPetSaved: (Long) -> Unit,
     onAddOwner: () -> Unit,
-    viewModel: PetFormViewModel = hiltViewModel()
+    viewModel: PetFormViewModel = hiltViewModel(),
+    createdOwnerId: Long? = null,
+    onCreatedOwnerConsumed: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsState()
+
+    // Auto-select an owner that was just created via the "Add owner" flow.
+    LaunchedEffect(createdOwnerId) {
+        if (createdOwnerId != null && createdOwnerId > 0) {
+            viewModel.selectOwnerById(createdOwnerId)
+            onCreatedOwnerConsumed()
+        }
+    }
 
     val attemptExit: () -> Unit = {
         if (viewModel.hasUnsavedChanges()) viewModel.showUnsavedDialog() else onNavigateBack()

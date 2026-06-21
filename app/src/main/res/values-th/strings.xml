@@ -151,6 +151,19 @@
     <string name="email_optional">อีเมล (ไม่บังคับ)</string>
     <string name="weight_kg">น้ำหนัก (กก.)</string>
     <string name="groomer_name">ชื่อช่างตัดขน</string>
+
+    <!-- Customer &amp; pet picker / onboarding -->
+    <string name="customer_and_pet">ลูกค้าและสัตว์เลี้ยง</string>
+    <string name="select_customer_pet">เลือกลูกค้าและสัตว์เลี้ยง</string>
+    <string name="new_customer_and_pet">เพิ่มลูกค้าและสัตว์เลี้ยงใหม่</string>
+    <string name="add_pet_for">เพิ่มสัตว์เลี้ยงให้ %1$s</string>
+    <string name="no_customers_yet">ยังไม่มีลูกค้า เพิ่มลูกค้าและสัตว์เลี้ยงรายแรกเพื่อเริ่มต้น</string>
+    <string name="no_matches_found">ไม่พบรายการที่ตรงกัน</string>
+    <string name="owner_details">ข้อมูลลูกค้า</string>
+    <string name="owner_not_found">ไม่พบลูกค้า</string>
+    <string name="pets_count">สัตว์เลี้ยง (%1$d)</string>
+    <string name="no_pets_for_owner">ยังไม่มีสัตว์เลี้ยง แตะ “เพิ่มสัตว์เลี้ยง” เพื่อเพิ่ม</string>
+    <string name="book">จอง</string>
     <string name="create_booking">สร้างการจอง</string>
     <string name="search_pets">ค้นหาสัตว์เลี้ยง</string>
     <string name="todays_bookings">การจองวันนี้</string>

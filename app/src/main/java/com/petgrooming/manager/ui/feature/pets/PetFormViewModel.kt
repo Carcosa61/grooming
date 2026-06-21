@@ -377,6 +377,20 @@ class PetFormViewModel @Inject constructor(
         )
     }
 
+    /**
+     * Auto-selects a newly created owner once it appears in the owners list.
+     * Stores the id so the owner is selected even if the list refresh arrives later.
+     */
+    fun selectOwnerById(ownerId: Long) {
+        if (ownerId <= 0) return
+        val owner = _uiState.value.owners.find { it.id == ownerId }
+        _uiState.value = _uiState.value.copy(
+            ownerId = ownerId,
+            selectedOwner = owner ?: _uiState.value.selectedOwner,
+            ownerError = null
+        )
+    }
+
     fun updateDateOfBirth(date: LocalDate) {
         _uiState.value = _uiState.value.copy(dateOfBirth = date)
     }
@@ -554,10 +568,6 @@ class PetFormViewModel @Inject constructor(
         
         if (state.name.isBlank()) {
             newState = newState.copy(nameError = "Pet name is required")
-            hasError = true
-        }
-        if (state.breed.isBlank()) {
-            newState = newState.copy(breedError = "Breed is required")
             hasError = true
         }
         if (state.selectedOwner == null) {

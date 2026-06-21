@@ -63,6 +63,7 @@ fun BookingFormScreen(
     onBookingSaved: (Long) -> Unit,
     onAddPet: (Long?) -> Unit,
     onEditPet: (Long) -> Unit,
+    onOpenOwnerDetail: (Long) -> Unit = {},
     viewModel: BookingFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -164,56 +165,58 @@ fun BookingFormScreen(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Customer (Owner) Selection
-                DropdownField(
-                    selected = uiState.selectedOwner,
-                    options = uiState.owners,
-                    onOptionSelected = viewModel::updateOwner,
-                    label = stringResource(R.string.select_owner),
-                    optionLabel = { "${it.name} (${it.mobileNumber})" },
-                    modifier = Modifier.fillMaxWidth()
+                // Customer & Pet selection — single unified picker
+                Text(
+                    text = stringResource(R.string.customer_and_pet),
+                    style = MaterialTheme.typography.labelLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Pet Selection (filtered by selected customer)
+                Spacer(modifier = Modifier.height(4.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
+                        .clickable { viewModel.openPicker() }
+                        .padding(12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    DropdownField(
-                        selected = uiState.selectedPet,
-                        options = uiState.availablePets,
-                        onOptionSelected = viewModel::updatePet,
-                        label = stringResource(R.string.select_pet),
-                        optionLabel = { it.pet.name },
-                        modifier = Modifier.weight(1f)
-                    )
-                    val selectedPhotoUri = uiState.selectedPet?.pet?.photoUri
-                    if (selectedPhotoUri != null) {
-                        Spacer(modifier = Modifier.width(8.dp))
+                    val selected = uiState.selectedPet
+                    if (selected != null) {
                         PetAvatar(
-                            name = uiState.selectedPet?.pet?.name ?: "",
-                            photoUri = selectedPhotoUri,
-                            size = 44,
-                            modifier = Modifier.clickable {
-                                uiState.selectedPet?.pet?.id?.let { onEditPet(it) }
-                            }
+                            name = selected.pet.name,
+                            photoUri = selected.pet.photoUri,
+                            size = 44
                         )
-                    }
-                    Spacer(modifier = Modifier.width(8.dp))
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(12.dp))
-                            .clickable { onAddPet(uiState.selectedOwner?.id) }
-                            .padding(horizontal = 4.dp, vertical = 4.dp)
-                    ) {
-                        Icon(Icons.Default.Pets, contentDescription = stringResource(R.string.add_pet))
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = selected.pet.name,
+                                style = MaterialTheme.typography.titleMedium
+                            )
+                            Text(
+                                text = "${selected.ownerName} • ${selected.ownerPhone}",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        if (selected.pet.photoUri != null) {
+                            IconButton(onClick = { onEditPet(selected.pet.id) }) {
+                                Icon(Icons.Default.Pets, contentDescription = stringResource(R.string.edit_pet))
+                            }
+                        }
+                    } else {
+                        Icon(
+                            Icons.Default.Pets,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         Text(
-                            text = stringResource(R.string.add_pet),
-                            style = MaterialTheme.typography.labelSmall,
-                            textAlign = TextAlign.Center
+                            text = stringResource(R.string.select_customer_pet),
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
                         )
                     }
                 }
@@ -385,5 +388,32 @@ fun BookingFormScreen(
                 )
             }
         }
+    }
+
+    if (uiState.showPicker) {
+        CustomerPetPickerSheet(
+            uiState = uiState,
+            onQueryChange = viewModel::updatePickerQuery,
+            onSelectPet = viewModel::selectPetFromPicker,
+            onAddPetForOwner = viewModel::openAddPetSheet,
+            onNewCustomer = viewModel::openNewCustomerSheet,
+            onOpenOwnerDetail = { ownerId ->
+                viewModel.closePicker()
+                onOpenOwnerDetail(ownerId)
+            },
+            onDismiss = viewModel::closePicker
+        )
+    }
+
+    if (uiState.showCreateSheet) {
+        InlineCreateSheet(
+            uiState = uiState,
+            onOwnerNameChange = viewModel::updateDraftOwnerName,
+            onOwnerMobileChange = viewModel::updateDraftOwnerMobile,
+            onPetNameChange = viewModel::updateDraftPetName,
+            onPetTypeChange = viewModel::updateDraftPetType,
+            onConfirm = viewModel::confirmCreate,
+            onDismiss = viewModel::closeCreateSheet
+        )
     }
 }

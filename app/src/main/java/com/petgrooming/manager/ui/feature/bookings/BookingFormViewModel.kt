@@ -11,6 +11,7 @@ import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.PetEntity
+import com.petgrooming.manager.data.local.entity.PetType
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
 import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.data.util.ImageStorage
@@ -59,7 +60,20 @@ data class BookingFormState(
     val savedBookingId: Long = 0,
     val error: String? = null,
     val petError: String? = null,
-    val dateError: String? = null
+    val dateError: String? = null,
+    // Unified customer/pet picker (Step 3)
+    val showPicker: Boolean = false,
+    val pickerQuery: String = "",
+    // Inline creation sheet (Step 2). createForOwner == null means a brand-new customer.
+    val showCreateSheet: Boolean = false,
+    val createForOwner: OwnerEntity? = null,
+    val draftOwnerName: String = "",
+    val draftOwnerMobile: String = "",
+    val draftPetName: String = "",
+    val draftPetType: PetType = PetType.DOG,
+    val draftOwnerNameError: String? = null,
+    val draftOwnerMobileError: String? = null,
+    val draftPetNameError: String? = null
 )
 
 data class PetWithOwner(
@@ -272,6 +286,145 @@ class BookingFormViewModel @Inject constructor(
             petId = keepPet?.pet?.id ?: 0,
             petError = null
         )
+    }
+
+    // ---- Unified customer/pet picker (Step 3) ----
+
+    fun openPicker() {
+        _uiState.value = _uiState.value.copy(showPicker = true, pickerQuery = "")
+    }
+
+    fun closePicker() {
+        _uiState.value = _uiState.value.copy(showPicker = false)
+    }
+
+    fun updatePickerQuery(query: String) {
+        _uiState.value = _uiState.value.copy(pickerQuery = query)
+    }
+
+    fun selectPetFromPicker(petWithOwner: PetWithOwner) {
+        val owner = _uiState.value.owners.find { it.id == petWithOwner.pet.ownerId }
+            ?: OwnerEntity(
+                id = petWithOwner.pet.ownerId,
+                name = petWithOwner.ownerName,
+                mobileNumber = petWithOwner.ownerPhone
+            )
+        _uiState.value = _uiState.value.copy(
+            selectedPet = petWithOwner,
+            selectedOwner = owner,
+            availablePets = _uiState.value.pets.filter { it.pet.ownerId == owner.id },
+            petId = petWithOwner.pet.id,
+            petError = null,
+            showPicker = false
+        )
+    }
+
+    // ---- Inline creation (Step 2) ----
+
+    fun openNewCustomerSheet() {
+        _uiState.value = _uiState.value.copy(
+            showCreateSheet = true,
+            createForOwner = null,
+            draftOwnerName = "",
+            draftOwnerMobile = "",
+            draftPetName = "",
+            draftPetType = PetType.DOG,
+            draftOwnerNameError = null,
+            draftOwnerMobileError = null,
+            draftPetNameError = null
+        )
+    }
+
+    fun openAddPetSheet(owner: OwnerEntity) {
+        _uiState.value = _uiState.value.copy(
+            showPicker = false,
+            showCreateSheet = true,
+            createForOwner = owner,
+            draftPetName = "",
+            draftPetType = PetType.DOG,
+            draftPetNameError = null
+        )
+    }
+
+    fun closeCreateSheet() {
+        _uiState.value = _uiState.value.copy(showCreateSheet = false)
+    }
+
+    fun updateDraftOwnerName(name: String) {
+        _uiState.value = _uiState.value.copy(draftOwnerName = name, draftOwnerNameError = null)
+    }
+
+    fun updateDraftOwnerMobile(mobile: String) {
+        _uiState.value = _uiState.value.copy(draftOwnerMobile = mobile, draftOwnerMobileError = null)
+    }
+
+    fun updateDraftPetName(name: String) {
+        _uiState.value = _uiState.value.copy(draftPetName = name, draftPetNameError = null)
+    }
+
+    fun updateDraftPetType(type: PetType) {
+        _uiState.value = _uiState.value.copy(draftPetType = type)
+    }
+
+    fun confirmCreate() {
+        val s = _uiState.value
+        var hasError = false
+        var ns = s
+        if (s.createForOwner == null) {
+            if (s.draftOwnerName.isBlank()) {
+                ns = ns.copy(draftOwnerNameError = "Name is required"); hasError = true
+            }
+            if (s.draftOwnerMobile.isBlank()) {
+                ns = ns.copy(draftOwnerMobileError = "Mobile number is required"); hasError = true
+            }
+        }
+        if (s.draftPetName.isBlank()) {
+            ns = ns.copy(draftPetNameError = "Pet name is required"); hasError = true
+        }
+        if (hasError) {
+            _uiState.value = ns
+            return
+        }
+
+        viewModelScope.launch {
+            try {
+                val owner: OwnerEntity = if (s.createForOwner == null) {
+                    val newOwner = OwnerEntity(
+                        name = s.draftOwnerName.trim(),
+                        mobileNumber = s.draftOwnerMobile.trim()
+                    )
+                    val ownerId = ownerRepository.insertOwner(newOwner)
+                    newOwner.copy(id = ownerId)
+                } else {
+                    s.createForOwner
+                }
+                val newPet = PetEntity(
+                    ownerId = owner.id,
+                    name = s.draftPetName.trim(),
+                    petType = s.draftPetType,
+                    breed = ""
+                )
+                val petId = petRepository.insertPet(newPet)
+                val petWithOwner = PetWithOwner(
+                    pet = newPet.copy(id = petId),
+                    ownerName = owner.name,
+                    ownerPhone = owner.mobileNumber
+                )
+                _uiState.value = _uiState.value.copy(
+                    selectedPet = petWithOwner,
+                    selectedOwner = owner,
+                    petId = petId,
+                    petError = null,
+                    showCreateSheet = false,
+                    showPicker = false
+                )
+            } catch (e: Exception) {
+                _uiState.value = _uiState.value.copy(
+                    error = e.message,
+                    showCreateSheet = false
+                )
+            }
+        }
     }
 
     fun updateDate(date: LocalDate) {

@@ -115,13 +115,15 @@ class OwnerFormViewModel @Inject constructor(
                     updatedAt = System.currentTimeMillis()
                 )
                 
-                if (state.id > 0) {
+                val savedId = if (state.id > 0) {
                     ownerRepository.updateOwner(owner)
+                    state.id
                 } else {
                     ownerRepository.insertOwner(owner)
                 }
                 
                 _uiState.value = _uiState.value.copy(
+                    id = savedId,
                     isLoading = false,
                     isSaved = true
                 )

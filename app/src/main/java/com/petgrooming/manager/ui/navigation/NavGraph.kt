@@ -1,6 +1,8 @@
 package com.petgrooming.manager.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
@@ -13,6 +15,7 @@ import com.petgrooming.manager.ui.feature.bookings.BookingsScreen
 import com.petgrooming.manager.ui.feature.calendar.CalendarScreen
 import com.petgrooming.manager.ui.feature.dashboard.DashboardScreen
 import com.petgrooming.manager.ui.feature.owners.OwnerFormScreen
+import com.petgrooming.manager.ui.feature.owners.OwnerDetailScreen
 import com.petgrooming.manager.ui.feature.pets.PetFormScreen
 import com.petgrooming.manager.ui.feature.pets.PetsScreen
 import com.petgrooming.manager.ui.feature.settings.ServicePriceScreen
@@ -23,7 +26,7 @@ object Routes {
     const val BOOKINGS = "bookings"
     const val BOOKINGS_WITH_DATE = "bookings?date={date}"
     const val BOOKING_DETAIL = "booking/{bookingId}"
-    const val BOOKING_CREATE = "booking/create?date={date}"
+    const val BOOKING_CREATE = "booking/create?date={date}&petId={petId}"
     const val BOOKING_EDIT = "booking/{bookingId}/edit"
     const val PETS = "pets"
     const val PET_DETAIL = "pet/{petId}"
@@ -31,6 +34,7 @@ object Routes {
     const val PET_EDIT = "pet/{petId}/edit"
     const val OWNER_CREATE = "owner/create"
     const val OWNER_EDIT = "owner/{ownerId}/edit"
+    const val OWNER_DETAIL = "owner/{ownerId}"
     const val CALENDAR = "calendar"
     const val SETTINGS = "settings"
     const val SERVICE_PRICES = "service_prices"
@@ -39,12 +43,14 @@ object Routes {
     fun bookingsForDate(date: java.time.LocalDate) = "bookings?date=$date"
     fun bookingCreate(date: String? = null) =
         if (date != null) "booking/create?date=$date" else "booking/create"
+    fun bookingCreateForPet(petId: Long) = "booking/create?petId=$petId"
     fun bookingEdit(bookingId: Long) = "booking/$bookingId/edit"
     fun petCreate(ownerId: Long? = null) =
         if (ownerId != null && ownerId > 0) "pet/create?ownerId=$ownerId" else "pet/create"
     fun petDetail(petId: Long) = "pet/$petId"
     fun petEdit(petId: Long) = "pet/$petId/edit"
     fun ownerEdit(ownerId: Long) = "owner/$ownerId/edit"
+    fun ownerDetail(ownerId: Long) = "owner/$ownerId"
 }
 
 @Composable
@@ -98,7 +104,8 @@ fun PetGroomingNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
                 onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
-                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) },
+                onOpenOwnerDetail = { ownerId -> navController.navigate(Routes.ownerDetail(ownerId)) }
             )
         }
 
@@ -109,6 +116,10 @@ fun PetGroomingNavHost(
                     type = NavType.StringType
                     nullable = true
                     defaultValue = null
+                },
+                navArgument("petId") {
+                    type = NavType.LongType
+                    defaultValue = 0L
                 }
             )
         ) {
@@ -116,7 +127,8 @@ fun PetGroomingNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
                 onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
-                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) },
+                onOpenOwnerDetail = { ownerId -> navController.navigate(Routes.ownerDetail(ownerId)) }
             )
         }
 
@@ -128,7 +140,8 @@ fun PetGroomingNavHost(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
                 onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
-                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) },
+                onOpenOwnerDetail = { ownerId -> navController.navigate(Routes.ownerDetail(ownerId)) }
             )
         }
 
@@ -144,11 +157,15 @@ fun PetGroomingNavHost(
         composable(
             route = Routes.PET_DETAIL,
             arguments = listOf(navArgument("petId") { type = NavType.LongType })
-        ) {
+        ) { backStackEntry ->
+            val createdOwnerId by backStackEntry.savedStateHandle
+                .getStateFlow<Long?>("created_owner_id", null).collectAsState()
             PetFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onPetSaved = { navController.popBackStack() },
-                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) }
+                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) },
+                createdOwnerId = createdOwnerId,
+                onCreatedOwnerConsumed = { backStackEntry.savedStateHandle["created_owner_id"] = null }
             )
         }
 
@@ -160,29 +177,40 @@ fun PetGroomingNavHost(
                     defaultValue = 0L
                 }
             )
-        ) {
+        ) { backStackEntry ->
+            val createdOwnerId by backStackEntry.savedStateHandle
+                .getStateFlow<Long?>("created_owner_id", null).collectAsState()
             PetFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onPetSaved = { navController.popBackStack() },
-                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) }
+                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) },
+                createdOwnerId = createdOwnerId,
+                onCreatedOwnerConsumed = { backStackEntry.savedStateHandle["created_owner_id"] = null }
             )
         }
 
         composable(
             route = Routes.PET_EDIT,
             arguments = listOf(navArgument("petId") { type = NavType.LongType })
-        ) {
+        ) { backStackEntry ->
+            val createdOwnerId by backStackEntry.savedStateHandle
+                .getStateFlow<Long?>("created_owner_id", null).collectAsState()
             PetFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onPetSaved = { navController.popBackStack() },
-                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) }
+                onAddOwner = { navController.navigate(Routes.OWNER_CREATE) },
+                createdOwnerId = createdOwnerId,
+                onCreatedOwnerConsumed = { backStackEntry.savedStateHandle["created_owner_id"] = null }
             )
         }
 
         composable(Routes.OWNER_CREATE) {
             OwnerFormScreen(
                 onNavigateBack = { navController.popBackStack() },
-                onOwnerSaved = { navController.popBackStack() }
+                onOwnerSaved = { ownerId ->
+                    navController.previousBackStackEntry?.savedStateHandle?.set("created_owner_id", ownerId)
+                    navController.popBackStack()
+                }
             )
         }
 
@@ -193,6 +221,19 @@ fun PetGroomingNavHost(
             OwnerFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onOwnerSaved = { navController.popBackStack() }
+            )
+        }
+
+        composable(
+            route = Routes.OWNER_DETAIL,
+            arguments = listOf(navArgument("ownerId") { type = NavType.LongType })
+        ) {
+            OwnerDetailScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onEditOwner = { ownerId -> navController.navigate(Routes.ownerEdit(ownerId)) },
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
+                onPetClick = { petId -> navController.navigate(Routes.petEdit(petId)) },
+                onBookPet = { petId -> navController.navigate(Routes.bookingCreateForPet(petId)) }
             )
         }
 
