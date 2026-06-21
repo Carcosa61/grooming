@@ -4,6 +4,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
+import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
@@ -19,12 +20,13 @@ import com.petgrooming.manager.ui.feature.settings.SettingsScreen
 object Routes {
     const val DASHBOARD = "dashboard"
     const val BOOKINGS = "bookings"
+    const val BOOKINGS_WITH_DATE = "bookings?date={date}"
     const val BOOKING_DETAIL = "booking/{bookingId}"
-    const val BOOKING_CREATE = "booking/create"
+    const val BOOKING_CREATE = "booking/create?date={date}"
     const val BOOKING_EDIT = "booking/{bookingId}/edit"
     const val PETS = "pets"
     const val PET_DETAIL = "pet/{petId}"
-    const val PET_CREATE = "pet/create"
+    const val PET_CREATE = "pet/create?ownerId={ownerId}"
     const val PET_EDIT = "pet/{petId}/edit"
     const val OWNER_CREATE = "owner/create"
     const val OWNER_EDIT = "owner/{ownerId}/edit"
@@ -32,7 +34,12 @@ object Routes {
     const val SETTINGS = "settings"
 
     fun bookingDetail(bookingId: Long) = "booking/$bookingId"
+    fun bookingsForDate(date: java.time.LocalDate) = "bookings?date=$date"
+    fun bookingCreate(date: String? = null) =
+        if (date != null) "booking/create?date=$date" else "booking/create"
     fun bookingEdit(bookingId: Long) = "booking/$bookingId/edit"
+    fun petCreate(ownerId: Long? = null) =
+        if (ownerId != null && ownerId > 0) "pet/create?ownerId=$ownerId" else "pet/create"
     fun petDetail(petId: Long) = "pet/$petId"
     fun petEdit(petId: Long) = "pet/$petId/edit"
     fun ownerEdit(ownerId: Long) = "owner/$ownerId/edit"
@@ -55,16 +62,27 @@ fun PetGroomingNavHost(
                 onNavigateToBookingEdit = { bookingId ->
                     navController.navigate(Routes.bookingEdit(bookingId))
                 },
-                onNavigateToCreateBooking = { navController.navigate(Routes.BOOKING_CREATE) }
+                onNavigateToCreateBooking = { navController.navigate(Routes.bookingCreate()) }
             )
         }
 
-        composable(Routes.BOOKINGS) {
+        composable(
+            route = Routes.BOOKINGS_WITH_DATE,
+            arguments = listOf(
+                navArgument("date") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) {
             BookingsScreen(
                 onNavigateToBookingDetail = { bookingId ->
                     navController.navigate(Routes.bookingDetail(bookingId))
                 },
-                onNavigateToCreateBooking = { navController.navigate(Routes.BOOKING_CREATE) }
+                onNavigateToCreateBooking = { selectedDate ->
+                    navController.navigate(Routes.bookingCreate(selectedDate.toString()))
+                }
             )
         }
 
@@ -77,15 +95,24 @@ fun PetGroomingNavHost(
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { navController.navigate(Routes.PET_CREATE) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
             )
         }
 
-        composable(Routes.BOOKING_CREATE) {
+        composable(
+            route = Routes.BOOKING_CREATE,
+            arguments = listOf(
+                navArgument("date") {
+                    type = NavType.StringType
+                    nullable = true
+                    defaultValue = null
+                }
+            )
+        ) {
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { navController.navigate(Routes.PET_CREATE) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
             )
         }
 
@@ -96,7 +123,7 @@ fun PetGroomingNavHost(
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { navController.navigate(Routes.PET_CREATE) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
             )
         }
 
@@ -105,7 +132,7 @@ fun PetGroomingNavHost(
                 onNavigateToPetDetail = { petId ->
                     navController.navigate(Routes.petEdit(petId))
                 },
-                onNavigateToCreatePet = { navController.navigate(Routes.PET_CREATE) }
+                onNavigateToCreatePet = { navController.navigate(Routes.petCreate()) }
             )
         }
 
@@ -120,7 +147,15 @@ fun PetGroomingNavHost(
             )
         }
 
-        composable(Routes.PET_CREATE) {
+        composable(
+            route = Routes.PET_CREATE,
+            arguments = listOf(
+                navArgument("ownerId") {
+                    type = NavType.LongType
+                    defaultValue = 0L
+                }
+            )
+        ) {
             PetFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onPetSaved = { navController.popBackStack() },
@@ -159,7 +194,10 @@ fun PetGroomingNavHost(
         composable(Routes.CALENDAR) {
             CalendarScreen(
                 onNavigateToDate = { date ->
-                    navController.navigate(Routes.BOOKINGS)
+                    navController.navigate(Routes.bookingsForDate(date)) {
+                        popUpTo(navController.graph.findStartDestination().id)
+                        launchSingleTop = true
+                    }
                 }
             )
         }

@@ -48,7 +48,7 @@ import com.petgrooming.manager.ui.components.TimePickerField
 fun BookingFormScreen(
     onNavigateBack: () -> Unit,
     onBookingSaved: (Long) -> Unit,
-    onAddPet: () -> Unit,
+    onAddPet: (Long?) -> Unit,
     viewModel: BookingFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -127,21 +127,33 @@ fun BookingFormScreen(
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {
-                // Pet Selection
+                // Customer (Owner) Selection
+                DropdownField(
+                    selected = uiState.selectedOwner,
+                    options = uiState.owners,
+                    onOptionSelected = viewModel::updateOwner,
+                    label = stringResource(R.string.select_owner),
+                    optionLabel = { "${it.name} (${it.mobileNumber})" },
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Pet Selection (filtered by selected customer)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     DropdownField(
                         selected = uiState.selectedPet,
-                        options = uiState.pets,
+                        options = uiState.availablePets,
                         onOptionSelected = viewModel::updatePet,
                         label = stringResource(R.string.select_pet),
-                        optionLabel = { "${it.pet.name} (${it.ownerName})" },
+                        optionLabel = { it.pet.name },
                         modifier = Modifier.weight(1f)
                     )
                     Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = onAddPet) {
+                    IconButton(onClick = { onAddPet(uiState.selectedOwner?.id) }) {
                         Icon(Icons.Default.Pets, contentDescription = stringResource(R.string.add_pet))
                     }
                 }

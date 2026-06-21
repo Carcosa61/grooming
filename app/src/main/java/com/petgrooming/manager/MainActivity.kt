@@ -99,7 +99,7 @@ fun MainScreen() {
             NavigationBar {
                 navItems.forEach { item ->
                     NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any { it.route == item.route } == true,
+                        selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true,
                         onClick = {
                             navController.navigate(item.route) {
                                 popUpTo(navController.graph.findStartDestination().id) {

@@ -8,11 +8,13 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.data.local.entity.BookingEntity
 import com.petgrooming.manager.data.local.entity.BookingStatus
+import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
 import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.data.util.ImageStorage
 import com.petgrooming.manager.domain.repository.BookingRepository
+import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import com.petgrooming.manager.domain.repository.RebookingRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +44,9 @@ data class BookingFormState(
     val isBeforePhotoProcessing: Boolean = false,
     val isAfterPhotoProcessing: Boolean = false,
     val pets: List<PetWithOwner> = emptyList(),
+    val owners: List<OwnerEntity> = emptyList(),
+    val selectedOwner: OwnerEntity? = null,
+    val availablePets: List<PetWithOwner> = emptyList(),
     val selectedPet: PetWithOwner? = null,
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
@@ -64,6 +69,7 @@ class BookingFormViewModel @Inject constructor(
     @ApplicationContext private val context: Context,
     private val bookingRepository: BookingRepository,
     private val petRepository: PetRepository,
+    private val ownerRepository: OwnerRepository,
     private val rebookingRepository: RebookingRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
@@ -76,6 +82,7 @@ class BookingFormViewModel @Inject constructor(
     val uiState: StateFlow<BookingFormState> = _uiState.asStateFlow()
 
     init {
+        loadOwners()
         loadPets()
         if (bookingId > 0) {
             loadBooking(bookingId)
@@ -88,6 +95,14 @@ class BookingFormViewModel @Inject constructor(
                 } catch (e: Exception) {
                     // Ignore invalid date
                 }
+            }
+        }
+    }
+
+    private fun loadOwners() {
+        viewModelScope.launch {
+            ownerRepository.getAllOwners().collect { owners ->
+                _uiState.value = _uiState.value.copy(owners = owners)
             }
         }
     }
@@ -106,8 +121,20 @@ class BookingFormViewModel @Inject constructor(
                 if (pendingBookingPetId != null && selectedPet != null) {
                     pendingBookingPetId = null
                 }
+                // Derive the selected owner from the selected pet when available
+                val selectedOwner = selectedPet?.let { sp ->
+                    _uiState.value.owners.find { it.id == sp.pet.ownerId }
+                        ?: OwnerEntity(id = sp.pet.ownerId, name = sp.ownerName, mobileNumber = sp.ownerPhone)
+                } ?: _uiState.value.selectedOwner
+                val availablePets = if (selectedOwner != null) {
+                    petsWithOwners.filter { it.pet.ownerId == selectedOwner.id }
+                } else {
+                    petsWithOwners
+                }
                 _uiState.value = _uiState.value.copy(
                     pets = petsWithOwners,
+                    availablePets = availablePets,
+                    selectedOwner = selectedOwner,
                     selectedPet = selectedPet,
                     petId = selectedPet?.pet?.id ?: _uiState.value.petId
                 )
@@ -156,6 +183,20 @@ class BookingFormViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(
             selectedPet = petWithOwner,
             petId = petWithOwner.pet.id,
+            petError = null
+        )
+    }
+
+    fun updateOwner(owner: OwnerEntity) {
+        val state = _uiState.value
+        val availablePets = state.pets.filter { it.pet.ownerId == owner.id }
+        // Keep the current pet only if it still belongs to the selected owner
+        val keepPet = state.selectedPet?.takeIf { it.pet.ownerId == owner.id }
+        _uiState.value = state.copy(
+            selectedOwner = owner,
+            availablePets = availablePets,
+            selectedPet = keepPet,
+            petId = keepPet?.pet?.id ?: 0,
             petError = null
         )
     }

@@ -1,13 +1,17 @@
 package com.petgrooming.manager.ui.feature.bookings
 
 import android.util.Log
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.data.local.entity.BookingEntity
 import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
 import com.petgrooming.manager.domain.repository.BookingRepository
+import com.petgrooming.manager.domain.repository.OwnerRepository
+import com.petgrooming.manager.domain.repository.PetRepository
 import com.petgrooming.manager.domain.repository.RebookingRepository
+import com.petgrooming.manager.ui.feature.dashboard.BookingWithDetails
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,7 +24,7 @@ private const val TAG = "BookingsViewModel"
 
 data class BookingsUiState(
     val isLoading: Boolean = true,
-    val bookings: List<BookingEntity> = emptyList(),
+    val bookings: List<BookingWithDetails> = emptyList(),
     val selectedDate: LocalDate = LocalDate.now(),
     val error: String? = null
 )
@@ -28,14 +32,20 @@ data class BookingsUiState(
 @HiltViewModel
 class BookingsViewModel @Inject constructor(
     private val bookingRepository: BookingRepository,
-    private val rebookingRepository: RebookingRepository
+    private val rebookingRepository: RebookingRepository,
+    private val petRepository: PetRepository,
+    private val ownerRepository: OwnerRepository,
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(BookingsUiState())
     val uiState: StateFlow<BookingsUiState> = _uiState.asStateFlow()
 
     init {
-        loadBookingsForDate(LocalDate.now())
+        val initialDate = savedStateHandle.get<String>("date")
+            ?.let { runCatching { LocalDate.parse(it) }.getOrNull() }
+            ?: LocalDate.now()
+        loadBookingsForDate(initialDate)
     }
 
     fun loadBookingsForDate(date: LocalDate) {
@@ -50,7 +60,7 @@ class BookingsViewModel @Inject constructor(
                 bookingRepository.getBookingsByDate(date).collect { bookings ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        bookings = bookings
+                        bookings = bookings.map { mapToDetails(it) }
                     )
                 }
             } catch (e: Exception) {
@@ -81,7 +91,7 @@ class BookingsViewModel @Inject constructor(
                 bookingRepository.getBookingsBetweenDates(startDate, endDate).collect { bookings ->
                     _uiState.value = _uiState.value.copy(
                         isLoading = false,
-                        bookings = bookings
+                        bookings = bookings.map { mapToDetails(it) }
                     )
                 }
             } catch (e: Exception) {
@@ -91,6 +101,21 @@ class BookingsViewModel @Inject constructor(
                 )
             }
         }
+    }
+
+    private suspend fun mapToDetails(booking: BookingEntity): BookingWithDetails {
+        val pet = petRepository.getPetById(booking.petId)
+        val owner = pet?.let { ownerRepository.getOwnerById(it.ownerId) }
+        return BookingWithDetails(
+            id = booking.id,
+            petId = booking.petId,
+            petName = pet?.name ?: "Unknown",
+            ownerName = owner?.name ?: "Unknown",
+            appointmentTime = booking.appointmentTime,
+            serviceType = booking.serviceType,
+            status = booking.status,
+            photoUri = pet?.photoUri
+        )
     }
 
     fun updateBookingStatus(bookingId: Long, newStatus: BookingStatus) {

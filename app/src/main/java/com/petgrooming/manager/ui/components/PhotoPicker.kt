@@ -2,8 +2,6 @@ package com.petgrooming.manager.ui.components
 
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -32,6 +30,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
+import com.canhub.cropper.CropImageContract
+import com.canhub.cropper.CropImageContractOptions
+import com.canhub.cropper.CropImageOptions
+import com.canhub.cropper.CropImageView
 import com.petgrooming.manager.R
 import java.io.File
 
@@ -39,7 +41,21 @@ import java.io.File
 internal fun photoModel(photoUri: String): Any =
     if (photoUri.startsWith("/")) File(photoUri) else photoUri
 
-private val imageOnly = PickVisualMediaRequest(ActivityResultContracts.PickVisualMedia.ImageOnly)
+private fun cropOptions(
+    fixAspectRatio: Boolean,
+    cropShape: CropImageView.CropShape
+) = CropImageContractOptions(
+    uri = null,
+    cropImageOptions = CropImageOptions(
+        imageSourceIncludeCamera = false,
+        imageSourceIncludeGallery = true,
+        fixAspectRatio = fixAspectRatio,
+        aspectRatioX = 1,
+        aspectRatioY = 1,
+        cropShape = cropShape,
+        guidelines = CropImageView.Guidelines.ON
+    )
+)
 
 /**
  * Circular avatar photo picker used on the pet form. Tapping the avatar (or the
@@ -56,9 +72,9 @@ fun AvatarPhotoPicker(
     size: Int = 96
 ) {
     val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri -> if (uri != null) onPhotoSelected(uri) }
-    val pick = { launcher.launch(imageOnly) }
+        CropImageContract()
+    ) { result -> if (result.isSuccessful) result.uriContent?.let(onPhotoSelected) }
+    val pick = { launcher.launch(cropOptions(fixAspectRatio = true, cropShape = CropImageView.CropShape.OVAL)) }
 
     Column(
         modifier = modifier.fillMaxWidth(),
@@ -118,9 +134,9 @@ fun PhotoPickerField(
     modifier: Modifier = Modifier
 ) {
     val launcher = rememberLauncherForActivityResult(
-        ActivityResultContracts.PickVisualMedia()
-    ) { uri -> if (uri != null) onPhotoSelected(uri) }
-    val pick = { launcher.launch(imageOnly) }
+        CropImageContract()
+    ) { result -> if (result.isSuccessful) result.uriContent?.let(onPhotoSelected) }
+    val pick = { launcher.launch(cropOptions(fixAspectRatio = false, cropShape = CropImageView.CropShape.RECTANGLE)) }
 
     Column(modifier = modifier) {
         Text(

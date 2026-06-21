@@ -310,13 +310,13 @@ private fun QuickStatCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(vertical = 14.dp, horizontal = 8.dp),
+                .padding(vertical = 18.dp, horizontal = 8.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Box(
                 modifier = Modifier
-                    .size(36.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .size(48.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(tint.copy(alpha = 0.15f)),
                 contentAlignment = Alignment.Center
             ) {
@@ -324,13 +324,13 @@ private fun QuickStatCard(
                     imageVector = icon,
                     contentDescription = null,
                     tint = tint,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(26.dp)
                 )
             }
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(10.dp))
             Text(
                 text = value.toString(),
-                style = MaterialTheme.typography.titleLarge,
+                style = MaterialTheme.typography.headlineSmall,
                 fontWeight = FontWeight.Bold
             )
             Text(
@@ -404,19 +404,27 @@ private fun RebookingCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Brush.verticalGradient(gradient))
-                .padding(vertical = 12.dp, horizontal = 8.dp)
+                .padding(vertical = 16.dp, horizontal = 8.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.9f),
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.height(4.dp))
+                Box(
+                    modifier = Modifier
+                        .size(44.dp)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = count.toString(),
                     style = MaterialTheme.typography.headlineMedium,

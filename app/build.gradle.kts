@@ -101,6 +101,9 @@ dependencies {
     // Coil (Image loading)
     implementation(libs.coil.compose)
 
+    // Image cropping / reframing
+    implementation(libs.android.image.cropper)
+
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
 

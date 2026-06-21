@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,10 +11,13 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
 import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
 import androidx.compose.material3.Card
@@ -33,21 +37,25 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
-import com.petgrooming.manager.data.local.entity.BookingEntity
-import com.petgrooming.manager.data.local.entity.BookingStatus
-import com.petgrooming.manager.ui.theme.StatusColors
+import com.petgrooming.manager.data.local.entity.ServiceType
+import com.petgrooming.manager.ui.components.PetAvatar
+import com.petgrooming.manager.ui.components.StatusBadge
+import com.petgrooming.manager.ui.components.bookingStatusColor
+import com.petgrooming.manager.ui.feature.dashboard.BookingWithDetails
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 @Composable
 fun BookingsScreen(
     onNavigateToBookingDetail: (Long) -> Unit,
-    onNavigateToCreateBooking: () -> Unit,
+    onNavigateToCreateBooking: (LocalDate) -> Unit,
     viewModel: BookingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -55,7 +63,7 @@ fun BookingsScreen(
     Scaffold(
         floatingActionButton = {
             FloatingActionButton(
-                onClick = onNavigateToCreateBooking,
+                onClick = { onNavigateToCreateBooking(uiState.selectedDate) },
                 containerColor = MaterialTheme.colorScheme.primary
             ) {
                 Icon(
@@ -191,58 +199,86 @@ private fun BookingsContent(
 
 @Composable
 private fun BookingListItem(
-    booking: BookingEntity,
+    booking: BookingWithDetails,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val statusColor = when (booking.status) {
-        BookingStatus.SCHEDULED -> StatusColors.Scheduled
-        BookingStatus.CHECKED_IN -> StatusColors.CheckedIn
-        BookingStatus.GROOMING -> StatusColors.Grooming
-        BookingStatus.READY_FOR_COLLECTION -> StatusColors.ReadyForCollection
-        BookingStatus.COMPLETED -> StatusColors.Completed
-        BookingStatus.CANCELLED -> StatusColors.Cancelled
-        BookingStatus.NO_SHOW -> StatusColors.NoShow
-    }
+    val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
+    val serviceLabel = getServiceTypeLabel(booking.serviceType)
+    val accent = bookingStatusColor(booking.status)
 
     Card(
         onClick = onClick,
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(16.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = "Pet ID: ${booking.petId}",
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = booking.appointmentTime.toString(),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    text = booking.serviceType.name.replace("_", " "),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            Card(
-                colors = CardDefaults.cardColors(containerColor = statusColor)
+        Row(modifier = Modifier.fillMaxWidth()) {
+            Box(
+                modifier = Modifier
+                    .size(width = 5.dp, height = 96.dp)
+                    .background(accent)
+            )
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = booking.status.name.replace("_", " "),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.onPrimary
-                )
+                PetAvatar(name = booking.petName, photoUri = booking.photoUri, size = 48)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = booking.petName,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.SemiBold
+                    )
+                    Text(
+                        text = booking.ownerName,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                    Spacer(modifier = Modifier.height(6.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Schedule,
+                            contentDescription = null,
+                            modifier = Modifier.size(14.dp),
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = booking.appointmentTime.format(timeFormatter),
+                            style = MaterialTheme.typography.bodyMedium,
+                            fontWeight = FontWeight.Medium
+                        )
+                        Text(
+                            text = "\u2022",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                        Text(
+                            text = serviceLabel,
+                            style = MaterialTheme.typography.bodyMedium,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(6.dp))
+                    StatusBadge(status = booking.status)
+                }
             }
         }
+    }
+}
+
+@Composable
+private fun getServiceTypeLabel(serviceType: ServiceType): String {
+    return when (serviceType) {
+        ServiceType.BATH -> stringResource(R.string.service_bath)
+        ServiceType.BATH_AND_DRY -> stringResource(R.string.service_bath_dry)
+        ServiceType.FULL_GROOM -> stringResource(R.string.service_full_groom)
+        ServiceType.NAIL_TRIM -> stringResource(R.string.service_nail_trim)
+        ServiceType.EAR_CLEANING -> stringResource(R.string.service_ear_cleaning)
+        ServiceType.CUSTOM -> stringResource(R.string.service_custom)
     }
 }
