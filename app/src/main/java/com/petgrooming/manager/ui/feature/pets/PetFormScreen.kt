@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.pets
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -46,6 +47,8 @@ import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormButtons
 import com.petgrooming.manager.ui.components.FormTextField
+import com.petgrooming.manager.ui.components.UnsavedChangesDialog
+import com.petgrooming.manager.ui.components.detectExitSwipe
 
 /**
  * Returns localized color name for display, or the original value for custom colors.
@@ -84,6 +87,13 @@ fun PetFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val attemptExit: () -> Unit = {
+        if (viewModel.hasUnsavedChanges()) viewModel.showUnsavedDialog() else onNavigateBack()
+    }
+
+    // Intercept system back / back-swipe gesture to confirm unsaved changes.
+    BackHandler(enabled = true) { attemptExit() }
+
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             onPetSaved(uiState.savedPetId)
@@ -94,6 +104,21 @@ fun PetFormScreen(
         if (uiState.isDeleted) {
             onNavigateBack()
         }
+    }
+
+    // Unsaved changes confirmation (triggered by swipe or back)
+    if (uiState.showUnsavedDialog) {
+        UnsavedChangesDialog(
+            onSave = {
+                viewModel.dismissUnsavedDialog()
+                viewModel.save()
+            },
+            onDiscard = {
+                viewModel.dismissUnsavedDialog()
+                onNavigateBack()
+            },
+            onDismiss = viewModel::dismissUnsavedDialog
+        )
     }
 
     // Delete confirmation dialog
@@ -125,7 +150,7 @@ fun PetFormScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = attemptExit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
@@ -155,6 +180,7 @@ fun PetFormScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .detectExitSwipe(attemptExit)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {

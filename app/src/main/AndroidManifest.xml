@@ -58,6 +58,12 @@
                 android:resource="@xml/file_paths" />
         </provider>
 
+        <!-- Image cropper requires an AppCompat theme; the app uses a Material theme. -->
+        <activity
+            android:name="com.canhub.cropper.CropImageActivity"
+            android:theme="@style/Theme.PetGroomingManager.Cropper"
+            tools:replace="android:theme" />
+
     </application>
 
 </manifest>

@@ -1,4 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <style name="Theme.PetGroomingManager" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!-- CropImageActivity (image cropper) requires a Theme.AppCompat descendant. -->
+    <style name="Theme.PetGroomingManager.Cropper" parent="Theme.AppCompat.Light.NoActionBar" />
 </resources>

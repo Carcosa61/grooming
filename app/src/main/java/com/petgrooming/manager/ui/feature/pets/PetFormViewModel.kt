@@ -61,6 +61,7 @@ data class PetFormState(
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false,
     val showDeleteConfirmation: Boolean = false,
+    val showUnsavedDialog: Boolean = false,
     val savedPetId: Long = 0,
     val error: String? = null,
     val nameError: String? = null,
@@ -154,6 +155,30 @@ class PetFormViewModel @Inject constructor(
     private val _uiState = MutableStateFlow(PetFormState())
     val uiState: StateFlow<PetFormState> = _uiState.asStateFlow()
 
+    // Snapshot of saved field values, used to detect unsaved changes.
+    private var savedSnapshot: String = ""
+    private var baselineInitialized = false
+
+    private fun computeSnapshot(s: PetFormState = _uiState.value): String = listOf(
+        s.name, s.petType, s.breed, s.dateOfBirth, s.gender, s.weight, s.color,
+        s.allergies, s.medications, s.behaviorNotes, s.notes, s.photoUri, s.ownerId
+    ).joinToString("\u0001") { it?.toString() ?: "" }
+
+    private fun captureBaseline() {
+        savedSnapshot = computeSnapshot()
+        baselineInitialized = true
+    }
+
+    fun hasUnsavedChanges(): Boolean = computeSnapshot() != savedSnapshot
+
+    fun showUnsavedDialog() {
+        _uiState.value = _uiState.value.copy(showUnsavedDialog = true)
+    }
+
+    fun dismissUnsavedDialog() {
+        _uiState.value = _uiState.value.copy(showUnsavedDialog = false)
+    }
+
     init {
         loadOwners()
         loadBreedsForType(_uiState.value.petType)
@@ -220,6 +245,12 @@ class PetFormViewModel @Inject constructor(
                     selectedOwner = selectedOwner,
                     ownerId = selectedOwner?.id ?: _uiState.value.ownerId
                 )
+                // For a new pet, capture the baseline once owners (and any
+                // preselected owner) are loaded so a preset owner isn't counted
+                // as an unsaved change.
+                if (petId == 0L && !baselineInitialized) {
+                    captureBaseline()
+                }
             }
         }
     }
@@ -248,6 +279,7 @@ class PetFormViewModel @Inject constructor(
                         selectedOwner = owner,
                         isLoading = false
                     )
+                    captureBaseline()
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

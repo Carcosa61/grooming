@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -49,6 +50,8 @@ import com.petgrooming.manager.ui.components.FormTextField
 import com.petgrooming.manager.ui.components.PetAvatar
 import com.petgrooming.manager.ui.components.PhotoPickerField
 import com.petgrooming.manager.ui.components.TimePickerField
+import com.petgrooming.manager.ui.components.UnsavedChangesDialog
+import com.petgrooming.manager.ui.components.detectExitSwipe
 import com.petgrooming.manager.ui.theme.StatusColors
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -62,6 +65,13 @@ fun BookingFormScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
 
+    val attemptExit: () -> Unit = {
+        if (viewModel.hasUnsavedChanges()) viewModel.showUnsavedDialog() else onNavigateBack()
+    }
+
+    // Intercept system back / back-swipe gesture to confirm unsaved changes.
+    BackHandler(enabled = true) { attemptExit() }
+
     LaunchedEffect(uiState.isSaved) {
         if (uiState.isSaved) {
             onBookingSaved(uiState.savedBookingId)
@@ -72,6 +82,21 @@ fun BookingFormScreen(
         if (uiState.isDeleted) {
             onNavigateBack()
         }
+    }
+
+    // Unsaved changes confirmation (triggered by swipe or back)
+    if (uiState.showUnsavedDialog) {
+        UnsavedChangesDialog(
+            onSave = {
+                viewModel.dismissUnsavedDialog()
+                viewModel.save()
+            },
+            onDiscard = {
+                viewModel.dismissUnsavedDialog()
+                onNavigateBack()
+            },
+            onDismiss = viewModel::dismissUnsavedDialog
+        )
     }
 
     // Delete confirmation dialog
@@ -103,7 +128,7 @@ fun BookingFormScreen(
                     )
                 },
                 navigationIcon = {
-                    IconButton(onClick = onNavigateBack) {
+                    IconButton(onClick = attemptExit) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.cancel))
                     }
                 },
@@ -133,6 +158,7 @@ fun BookingFormScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(paddingValues)
+                    .detectExitSwipe(attemptExit)
                     .padding(16.dp)
                     .verticalScroll(rememberScrollState())
             ) {

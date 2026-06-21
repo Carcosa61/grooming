@@ -51,6 +51,7 @@ data class BookingFormState(
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false,
     val showDeleteConfirmation: Boolean = false,
+    val showUnsavedDialog: Boolean = false,
     val savedBookingId: Long = 0,
     val error: String? = null,
     val petError: String? = null,
@@ -79,6 +80,30 @@ class BookingFormViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(BookingFormState())
     val uiState: StateFlow<BookingFormState> = _uiState.asStateFlow()
+
+    // Snapshot of saved field values, used to detect unsaved changes.
+    private var savedSnapshot: String = ""
+    private var baselineInitialized = false
+
+    private fun computeSnapshot(s: BookingFormState = _uiState.value): String = listOf(
+        s.petId, s.appointmentDate, s.appointmentTime, s.serviceType, s.status,
+        s.notes, s.beforePhotoUri, s.afterPhotoUri
+    ).joinToString("\u0001") { it?.toString() ?: "" }
+
+    private fun captureBaseline() {
+        savedSnapshot = computeSnapshot()
+        baselineInitialized = true
+    }
+
+    fun hasUnsavedChanges(): Boolean = computeSnapshot() != savedSnapshot
+
+    fun showUnsavedDialog() {
+        _uiState.value = _uiState.value.copy(showUnsavedDialog = true)
+    }
+
+    fun dismissUnsavedDialog() {
+        _uiState.value = _uiState.value.copy(showUnsavedDialog = false)
+    }
 
     init {
         loadOwners()
@@ -137,6 +162,9 @@ class BookingFormViewModel @Inject constructor(
                     selectedPet = selectedPet,
                     petId = selectedPet?.pet?.id ?: _uiState.value.petId
                 )
+                if (bookingId == 0L && !baselineInitialized) {
+                    captureBaseline()
+                }
             }
         }
     }
@@ -167,6 +195,7 @@ class BookingFormViewModel @Inject constructor(
                         selectedPet = petWithOwner,
                         isLoading = false
                     )
+                    captureBaseline()
                 }
             } catch (e: Exception) {
                 _uiState.value = _uiState.value.copy(

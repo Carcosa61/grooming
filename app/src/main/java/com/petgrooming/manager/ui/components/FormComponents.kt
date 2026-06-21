@@ -1,6 +1,7 @@
 package com.petgrooming.manager.ui.components
 
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -16,11 +17,14 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Schedule
 import androidx.compose.material3.Button
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DatePicker
 import androidx.compose.material3.DatePickerDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -38,6 +42,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
@@ -48,6 +53,7 @@ import java.time.LocalDate
 import java.time.LocalTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import kotlin.math.abs
 
 @Composable
 fun FormTextField(
@@ -219,6 +225,7 @@ fun TimePickerDialog(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun <T> DropdownField(
     selected: T?,
@@ -232,23 +239,25 @@ fun <T> DropdownField(
     // Pre-calculate labels since we need composable context
     val selectedLabel = selected?.let { optionLabel(it) } ?: ""
 
-    Box(modifier = modifier) {
+    ExposedDropdownMenuBox(
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        modifier = modifier
+    ) {
         OutlinedTextField(
             value = selectedLabel,
             onValueChange = { },
             label = { Text(label) },
             readOnly = true,
             trailingIcon = {
-                IconButton(onClick = { expanded = true }) {
-                    Icon(Icons.Default.ArrowDropDown, contentDescription = null)
-                }
+                ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
             },
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { expanded = true }
+                .menuAnchor()
         )
 
-        DropdownMenu(
+        ExposedDropdownMenu(
             expanded = expanded,
             onDismissRequest = { expanded = false }
         ) {
@@ -292,3 +301,48 @@ fun FormButtons(
         }
     }
 }
+
+/**
+ * Confirmation dialog shown when the user tries to leave a form (via swipe or
+ * back) while there are unsaved changes. Offers to save or discard the changes.
+ */
+@Composable
+fun UnsavedChangesDialog(
+    onSave: () -> Unit,
+    onDiscard: () -> Unit,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(R.string.unsaved_changes_title)) },
+        text = { Text(stringResource(R.string.unsaved_changes_message)) },
+        confirmButton = {
+            TextButton(onClick = onSave) {
+                Text(stringResource(R.string.save))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDiscard) {
+                Text(stringResource(R.string.discard))
+            }
+        }
+    )
+}
+
+/**
+ * Detects a deliberate horizontal swipe (left or right) and invokes [onSwipe].
+ * Used on form screens to prompt the user about unsaved changes before leaving.
+ */
+fun Modifier.detectExitSwipe(onSwipe: () -> Unit): Modifier = this.then(
+    Modifier.pointerInput(Unit) {
+        val threshold = 90.dp.toPx()
+        var total = 0f
+        detectHorizontalDragGestures(
+            onDragStart = { total = 0f },
+            onDragEnd = { if (abs(total) > threshold) onSwipe() }
+        ) { change, dragAmount ->
+            total += dragAmount
+            change.consume()
+        }
+    }
+)

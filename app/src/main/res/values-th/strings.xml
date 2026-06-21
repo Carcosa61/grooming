@@ -40,6 +40,9 @@
     <string name="notes">หมายเหตุ</string>
     <string name="save">บันทึก</string>
     <string name="cancel">ยกเลิก</string>
+    <string name="discard">ละทิ้ง</string>
+    <string name="unsaved_changes_title">การเปลี่ยนแปลงที่ยังไม่ได้บันทึก</string>
+    <string name="unsaved_changes_message">คุณมีการเปลี่ยนแปลงที่ยังไม่ได้บันทึก ต้องการบันทึกหรือไม่?</string>
     <string name="delete">ลบ</string>
     <string name="confirm_delete">ยืนยันการลบ</string>
     <string name="delete_pet_message">คุณแน่ใจหรือไม่ว่าต้องการลบสัตว์เลี้ยงนี้? การดำเนินการนี้ไม่สามารถยกเลิกได้</string>
