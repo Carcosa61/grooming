@@ -3,6 +3,7 @@ package com.petgrooming.manager.data.local
 import androidx.room.TypeConverter
 import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.Gender
+import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.PetType
 import com.petgrooming.manager.data.local.entity.ServiceType
 import java.time.LocalDate
@@ -47,5 +48,14 @@ class Converters {
     fun toBookingStatus(statusString: String?): BookingStatus? =
         statusString?.let {
             runCatching { BookingStatus.valueOf(it) }.getOrDefault(BookingStatus.SCHEDULED)
+        }
+
+    @TypeConverter
+    fun fromPaymentStatus(status: PaymentStatus?): String? = status?.name
+
+    @TypeConverter
+    fun toPaymentStatus(statusString: String?): PaymentStatus? =
+        statusString?.let {
+            runCatching { PaymentStatus.valueOf(it) }.getOrDefault(PaymentStatus.UNPAID)
         }
 }

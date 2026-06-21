@@ -12,6 +12,7 @@ import com.petgrooming.manager.data.local.dao.CustomListItemDao
 import com.petgrooming.manager.data.local.dao.OwnerDao
 import com.petgrooming.manager.data.local.dao.PetDao
 import com.petgrooming.manager.data.local.dao.RebookingReminderDao
+import com.petgrooming.manager.data.local.dao.ServicePriceDao
 import com.petgrooming.manager.data.local.entity.BookingEntity
 import com.petgrooming.manager.data.local.entity.CustomBreedEntity
 import com.petgrooming.manager.data.local.entity.CustomColorEntity
@@ -19,6 +20,7 @@ import com.petgrooming.manager.data.local.entity.CustomListItemEntity
 import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
+import com.petgrooming.manager.data.local.entity.ServicePriceEntity
 
 @Database(
     entities = [
@@ -28,9 +30,10 @@ import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
         RebookingReminderEntity::class,
         CustomBreedEntity::class,
         CustomColorEntity::class,
-        CustomListItemEntity::class
+        CustomListItemEntity::class,
+        ServicePriceEntity::class
     ],
-    version = 5,
+    version = 6,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -42,6 +45,7 @@ abstract class PetGroomingDatabase : RoomDatabase() {
     abstract fun customBreedDao(): CustomBreedDao
     abstract fun customColorDao(): CustomColorDao
     abstract fun customListItemDao(): CustomListItemDao
+    abstract fun servicePriceDao(): ServicePriceDao
 
     companion object {
         const val DATABASE_NAME = "pet_grooming.db"
@@ -100,6 +104,28 @@ abstract class PetGroomingDatabase : RoomDatabase() {
                     )
                 """.trimIndent())
                 db.execSQL("CREATE UNIQUE INDEX IF NOT EXISTS index_custom_list_items_category_value ON custom_list_items (category, value)")
+            }
+        }
+
+        val MIGRATION_5_6 = object : Migration(5, 6) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add revenue fields to bookings
+                db.execSQL("ALTER TABLE bookings ADD COLUMN price REAL")
+                db.execSQL("ALTER TABLE bookings ADD COLUMN paymentStatus TEXT NOT NULL DEFAULT 'UNPAID'")
+                // Create service_prices table (default price per service type)
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS service_prices (
+                        serviceType TEXT PRIMARY KEY NOT NULL,
+                        price REAL NOT NULL
+                    )
+                """.trimIndent())
+                // Seed sensible default prices (THB); can be edited in Settings
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('BATH', 300.0)")
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('BATH_AND_DRY', 400.0)")
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('FULL_GROOM', 800.0)")
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('NAIL_TRIM', 150.0)")
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('EAR_CLEANING', 150.0)")
+                db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('CUSTOM', 0.0)")
             }
         }
     }

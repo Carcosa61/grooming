@@ -78,6 +78,8 @@ data class BookingEntity(
     val appointmentTime: LocalTime,
     val serviceType: ServiceType,
     val status: BookingStatus = BookingStatus.SCHEDULED,
+    val price: Double? = null,
+    val paymentStatus: PaymentStatus = PaymentStatus.UNPAID,
     val groomerName: String? = null,
     val notes: String? = null,
     val beforePhotoUri: String? = null,
@@ -101,6 +103,19 @@ enum class BookingStatus {
     CANCELLED,
     NO_SHOW
 }
+
+enum class PaymentStatus {
+    UNPAID,
+    PAID,
+    REFUNDED
+}
+
+@Entity(tableName = "service_prices")
+data class ServicePriceEntity(
+    @PrimaryKey
+    val serviceType: ServiceType,
+    val price: Double = 0.0
+)
 
 @Entity(
     tableName = "rebooking_reminders",

@@ -37,6 +37,11 @@
     <string name="appointment_date">วันที่นัดหมาย</string>
     <string name="appointment_time">เวลานัดหมาย</string>
     <string name="service_type">ประเภทบริการ</string>
+    <string name="price">ราคา (฿)</string>
+    <string name="payment_status">การชำระเงิน</string>
+    <string name="payment_unpaid">ยังไม่ชำระ</string>
+    <string name="payment_paid">ชำระแล้ว</string>
+    <string name="payment_refunded">คืนเงิน</string>
     <string name="notes">หมายเหตุ</string>
     <string name="save">บันทึก</string>
     <string name="cancel">ยกเลิก</string>
@@ -214,6 +219,12 @@
     <!-- Settings Sections -->
     <string name="settings_about">เกี่ยวกับ</string>
     <string name="settings_version">เวอร์ชัน %1$s</string>
+
+    <!-- Service Prices -->
+    <string name="service_prices_section">ราคา</string>
+    <string name="service_prices_title">ราคาบริการ</string>
+    <string name="service_prices_subtitle">ตั้งราคาเริ่มต้นสำหรับแต่ละบริการ</string>
+    <string name="service_prices_saved">บันทึกราคาแล้ว</string>
 
     <!-- Pet Details Popup -->
     <string name="pet_details">รายละเอียดสัตว์เลี้ยง</string>

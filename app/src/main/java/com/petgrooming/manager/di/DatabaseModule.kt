@@ -10,6 +10,7 @@ import com.petgrooming.manager.data.local.dao.CustomListItemDao
 import com.petgrooming.manager.data.local.dao.OwnerDao
 import com.petgrooming.manager.data.local.dao.PetDao
 import com.petgrooming.manager.data.local.dao.RebookingReminderDao
+import com.petgrooming.manager.data.local.dao.ServicePriceDao
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -35,7 +36,8 @@ object DatabaseModule {
                 PetGroomingDatabase.MIGRATION_1_2,
                 PetGroomingDatabase.MIGRATION_2_3,
                 PetGroomingDatabase.MIGRATION_3_4,
-                PetGroomingDatabase.MIGRATION_4_5
+                PetGroomingDatabase.MIGRATION_4_5,
+                PetGroomingDatabase.MIGRATION_5_6
             )
             .build()
     }
@@ -73,5 +75,10 @@ object DatabaseModule {
     @Provides
     fun provideCustomListItemDao(database: PetGroomingDatabase): CustomListItemDao {
         return database.customListItemDao()
+    }
+
+    @Provides
+    fun provideServicePriceDao(database: PetGroomingDatabase): ServicePriceDao {
+        return database.servicePriceDao()
     }
 }

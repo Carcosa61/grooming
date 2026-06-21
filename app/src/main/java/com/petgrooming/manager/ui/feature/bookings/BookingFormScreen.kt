@@ -38,10 +38,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
 import com.petgrooming.manager.data.local.entity.BookingStatus
+import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
@@ -267,6 +269,34 @@ fun BookingFormScreen(
                             ServiceType.NAIL_TRIM -> stringResource(R.string.service_nail_trim)
                             ServiceType.EAR_CLEANING -> stringResource(R.string.service_ear_cleaning)
                             ServiceType.CUSTOM -> stringResource(R.string.service_custom)
+                        }
+                    }
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Price
+                FormTextField(
+                    value = uiState.priceInput,
+                    onValueChange = viewModel::updatePrice,
+                    label = stringResource(R.string.price),
+                    keyboardType = KeyboardType.Decimal,
+                    singleLine = true
+                )
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                // Payment status
+                DropdownField(
+                    selected = uiState.paymentStatus,
+                    options = PaymentStatus.entries,
+                    onOptionSelected = viewModel::updatePaymentStatus,
+                    label = stringResource(R.string.payment_status),
+                    optionLabel = { status ->
+                        when (status) {
+                            PaymentStatus.UNPAID -> stringResource(R.string.payment_unpaid)
+                            PaymentStatus.PAID -> stringResource(R.string.payment_paid)
+                            PaymentStatus.REFUNDED -> stringResource(R.string.payment_refunded)
                         }
                     }
                 )

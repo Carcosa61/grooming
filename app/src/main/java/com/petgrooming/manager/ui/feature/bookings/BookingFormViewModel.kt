@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.data.local.entity.BookingEntity
 import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.OwnerEntity
+import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.RebookingReminderEntity
 import com.petgrooming.manager.data.local.entity.ServiceType
@@ -17,6 +18,7 @@ import com.petgrooming.manager.domain.repository.BookingRepository
 import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import com.petgrooming.manager.domain.repository.RebookingRepository
+import com.petgrooming.manager.domain.repository.ServicePriceRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -35,6 +37,8 @@ data class BookingFormState(
     val appointmentDate: LocalDate = LocalDate.now(),
     val appointmentTime: LocalTime = LocalTime.of(9, 0),
     val serviceType: ServiceType = ServiceType.FULL_GROOM,
+    val priceInput: String = "",
+    val paymentStatus: PaymentStatus = PaymentStatus.UNPAID,
     val status: BookingStatus = BookingStatus.SCHEDULED,
     val originalStatus: BookingStatus = BookingStatus.SCHEDULED,
     val notes: String = "",
@@ -71,6 +75,7 @@ class BookingFormViewModel @Inject constructor(
     private val petRepository: PetRepository,
     private val ownerRepository: OwnerRepository,
     private val rebookingRepository: RebookingRepository,
+    private val servicePriceRepository: ServicePriceRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -85,14 +90,32 @@ class BookingFormViewModel @Inject constructor(
     private var savedSnapshot: String = ""
     private var baselineInitialized = false
 
+    // Default price per service type (from the price book), used to auto-fill.
+    private var servicePrices: Map<ServiceType, Double> = emptyMap()
+    private var priceManuallyEdited = false
+    private var petsLoadedOnce = false
+    private var pricesLoadedOnce = false
+
     private fun computeSnapshot(s: BookingFormState = _uiState.value): String = listOf(
         s.petId, s.appointmentDate, s.appointmentTime, s.serviceType, s.status,
-        s.notes, s.beforePhotoUri, s.afterPhotoUri
+        s.priceInput, s.paymentStatus, s.notes, s.beforePhotoUri, s.afterPhotoUri
     ).joinToString("\u0001") { it?.toString() ?: "" }
 
     private fun captureBaseline() {
         savedSnapshot = computeSnapshot()
         baselineInitialized = true
+    }
+
+    private fun maybeCaptureNewBookingBaseline() {
+        if (bookingId == 0L && !baselineInitialized && petsLoadedOnce && pricesLoadedOnce) {
+            captureBaseline()
+        }
+    }
+
+    private fun formatPriceInput(price: Double?): String = when {
+        price == null -> ""
+        price == price.toLong().toDouble() -> price.toLong().toString()
+        else -> price.toString()
     }
 
     fun hasUnsavedChanges(): Boolean = computeSnapshot() != savedSnapshot
@@ -108,6 +131,7 @@ class BookingFormViewModel @Inject constructor(
     init {
         loadOwners()
         loadPets()
+        loadServicePrices()
         if (bookingId > 0) {
             loadBooking(bookingId)
         } else {
@@ -127,6 +151,23 @@ class BookingFormViewModel @Inject constructor(
         viewModelScope.launch {
             ownerRepository.getAllOwners().collect { owners ->
                 _uiState.value = _uiState.value.copy(owners = owners)
+            }
+        }
+    }
+
+    private fun loadServicePrices() {
+        viewModelScope.launch {
+            servicePriceRepository.getAllPrices().collect { prices ->
+                servicePrices = prices.associate { it.serviceType to it.price }
+                // Auto-fill the price for a new booking if the user hasn't typed one.
+                if (bookingId == 0L && !priceManuallyEdited) {
+                    val auto = servicePrices[_uiState.value.serviceType]
+                    if (auto != null) {
+                        _uiState.value = _uiState.value.copy(priceInput = formatPriceInput(auto))
+                    }
+                }
+                pricesLoadedOnce = true
+                maybeCaptureNewBookingBaseline()
             }
         }
     }
@@ -162,8 +203,9 @@ class BookingFormViewModel @Inject constructor(
                     selectedPet = selectedPet,
                     petId = selectedPet?.pet?.id ?: _uiState.value.petId
                 )
-                if (bookingId == 0L && !baselineInitialized) {
-                    captureBaseline()
+                if (bookingId == 0L) {
+                    petsLoadedOnce = true
+                    maybeCaptureNewBookingBaseline()
                 }
             }
         }
@@ -187,6 +229,8 @@ class BookingFormViewModel @Inject constructor(
                         appointmentDate = booking.appointmentDate,
                         appointmentTime = booking.appointmentTime,
                         serviceType = booking.serviceType,
+                        priceInput = formatPriceInput(booking.price),
+                        paymentStatus = booking.paymentStatus,
                         status = booking.status,
                         originalStatus = booking.status,
                         notes = booking.notes ?: "",
@@ -195,6 +239,8 @@ class BookingFormViewModel @Inject constructor(
                         selectedPet = petWithOwner,
                         isLoading = false
                     )
+                    // Existing bookings keep their saved price; don't auto-overwrite it.
+                    priceManuallyEdited = true
                     captureBaseline()
                 }
             } catch (e: Exception) {
@@ -240,7 +286,21 @@ class BookingFormViewModel @Inject constructor(
     }
 
     fun updateServiceType(serviceType: ServiceType) {
-        _uiState.value = _uiState.value.copy(serviceType = serviceType)
+        val auto = servicePrices[serviceType]
+        _uiState.value = _uiState.value.copy(
+            serviceType = serviceType,
+            priceInput = if (!priceManuallyEdited && auto != null) formatPriceInput(auto) else _uiState.value.priceInput
+        )
+    }
+
+    fun updatePrice(text: String) {
+        priceManuallyEdited = true
+        val filtered = text.filter { it.isDigit() || it == '.' }
+        _uiState.value = _uiState.value.copy(priceInput = filtered)
+    }
+
+    fun updatePaymentStatus(status: PaymentStatus) {
+        _uiState.value = _uiState.value.copy(paymentStatus = status)
     }
 
     fun updateNotes(notes: String) {
@@ -311,6 +371,8 @@ class BookingFormViewModel @Inject constructor(
                     appointmentTime = state.appointmentTime,
                     serviceType = state.serviceType,
                     status = state.status,
+                    price = state.priceInput.trim().toDoubleOrNull(),
+                    paymentStatus = state.paymentStatus,
                     notes = state.notes.trim().ifBlank { null },
                     beforePhotoUri = state.beforePhotoUri,
                     afterPhotoUri = state.afterPhotoUri,

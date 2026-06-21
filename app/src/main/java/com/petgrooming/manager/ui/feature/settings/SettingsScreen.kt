@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.CloudUpload
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Restore
+import androidx.compose.material.icons.filled.Sell
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
@@ -72,6 +73,7 @@ import java.util.Date
 @Composable
 fun SettingsScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToServicePrices: () -> Unit,
     viewModel: SettingsViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -196,6 +198,41 @@ fun SettingsScreen(
                 onBackupNow = viewModel::backupNow,
                 onPickRestoreFile = { restoreLauncher.launch(arrayOf("application/zip", "application/octet-stream", "*/*")) }
             )
+
+            Spacer(modifier = Modifier.height(24.dp))
+
+            // Pricing Section
+            Text(
+                text = stringResource(R.string.service_prices_section),
+                style = MaterialTheme.typography.titleMedium,
+                color = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.padding(16.dp)
+            )
+
+            Card(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp),
+                colors = CardDefaults.cardColors(
+                    containerColor = MaterialTheme.colorScheme.surfaceVariant
+                )
+            ) {
+                ListItem(
+                    headlineContent = { Text(stringResource(R.string.service_prices_title)) },
+                    supportingContent = { Text(stringResource(R.string.service_prices_subtitle)) },
+                    leadingContent = {
+                        Icon(
+                            imageVector = Icons.Default.Sell,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    },
+                    colors = ListItemDefaults.colors(
+                        containerColor = MaterialTheme.colorScheme.surfaceVariant
+                    ),
+                    modifier = Modifier.clickable(onClick = onNavigateToServicePrices)
+                )
+            }
 
             Spacer(modifier = Modifier.height(24.dp))
 

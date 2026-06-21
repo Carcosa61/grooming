@@ -7,6 +7,7 @@ import com.petgrooming.manager.data.repository.CustomListItemRepositoryImpl
 import com.petgrooming.manager.data.repository.OwnerRepositoryImpl
 import com.petgrooming.manager.data.repository.PetRepositoryImpl
 import com.petgrooming.manager.data.repository.RebookingRepositoryImpl
+import com.petgrooming.manager.data.repository.ServicePriceRepositoryImpl
 import com.petgrooming.manager.domain.repository.BookingRepository
 import com.petgrooming.manager.domain.repository.CustomBreedRepository
 import com.petgrooming.manager.domain.repository.CustomColorRepository
@@ -14,6 +15,7 @@ import com.petgrooming.manager.domain.repository.CustomListItemRepository
 import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import com.petgrooming.manager.domain.repository.RebookingRepository
+import com.petgrooming.manager.domain.repository.ServicePriceRepository
 import dagger.Binds
 import dagger.Module
 import dagger.hilt.InstallIn
@@ -65,4 +67,10 @@ abstract class RepositoryModule {
     abstract fun bindCustomListItemRepository(
         customListItemRepositoryImpl: CustomListItemRepositoryImpl
     ): CustomListItemRepository
+
+    @Binds
+    @Singleton
+    abstract fun bindServicePriceRepository(
+        servicePriceRepositoryImpl: ServicePriceRepositoryImpl
+    ): ServicePriceRepository
 }

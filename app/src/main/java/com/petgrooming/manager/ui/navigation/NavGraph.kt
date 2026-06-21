@@ -15,6 +15,7 @@ import com.petgrooming.manager.ui.feature.dashboard.DashboardScreen
 import com.petgrooming.manager.ui.feature.owners.OwnerFormScreen
 import com.petgrooming.manager.ui.feature.pets.PetFormScreen
 import com.petgrooming.manager.ui.feature.pets.PetsScreen
+import com.petgrooming.manager.ui.feature.settings.ServicePriceScreen
 import com.petgrooming.manager.ui.feature.settings.SettingsScreen
 
 object Routes {
@@ -32,6 +33,7 @@ object Routes {
     const val OWNER_EDIT = "owner/{ownerId}/edit"
     const val CALENDAR = "calendar"
     const val SETTINGS = "settings"
+    const val SERVICE_PRICES = "service_prices"
 
     fun bookingDetail(bookingId: Long) = "booking/$bookingId"
     fun bookingsForDate(date: java.time.LocalDate) = "bookings?date=$date"
@@ -207,6 +209,13 @@ fun PetGroomingNavHost(
 
         composable(Routes.SETTINGS) {
             SettingsScreen(
+                onNavigateBack = { navController.popBackStack() },
+                onNavigateToServicePrices = { navController.navigate(Routes.SERVICE_PRICES) }
+            )
+        }
+
+        composable(Routes.SERVICE_PRICES) {
+            ServicePriceScreen(
                 onNavigateBack = { navController.popBackStack() }
             )
         }
