@@ -211,4 +211,57 @@
     <!-- Settings Sections -->
     <string name="settings_about">เกี่ยวกับ</string>
     <string name="settings_version">เวอร์ชัน %1$s</string>
+
+    <!-- Pet Details Popup -->
+    <string name="pet_details">รายละเอียดสัตว์เลี้ยง</string>
+    <string name="no_details_available">ไม่มีข้อมูล</string>
+
+    <!-- Sorting -->
+    <string name="sort_by">เรียงตาม</string>
+    <string name="sort_name_asc">ชื่อ (ก-ฮ)</string>
+    <string name="sort_name_desc">ชื่อ (ฮ-ก)</string>
+    <string name="sort_last_visit">เข้ารับบริการล่าสุด</string>
+
+    <!-- Custom list inputs -->
+    <string name="enter_custom_allergy">ป้อนอาการแพ้</string>
+    <string name="enter_custom_medication">ป้อนยา</string>
+    <string name="enter_custom_behavior">ป้อนพฤติกรรม</string>
+
+    <!-- Default frequent allergies -->
+    <string-array name="default_allergies">
+        <item>ไก่</item>
+        <item>ข้าวโพด</item>
+        <item>นม</item>
+        <item>หมัด</item>
+        <item>หญ้า</item>
+        <item>เกสรดอกไม้</item>
+        <item>แชมพู/น้ำหอม</item>
+        <item>ถั่วเหลือง</item>
+        <item>ข้าวสาลี</item>
+    </string-array>
+
+    <!-- Default frequent medications -->
+    <string-array name="default_medications">
+        <item>ยาปฏิชีวนะ</item>
+        <item>ยาต้านเชื้อรา</item>
+        <item>ยาถ่ายพยาธิ</item>
+        <item>ยาป้องกันหมัดและเห็บ</item>
+        <item>ยาป้องกันพยาธิหนอนหัวใจ</item>
+        <item>ยาแก้ปวด</item>
+        <item>ยาสเตียรอยด์</item>
+        <item>ถึงกำหนดวัคซีน</item>
+    </string-array>
+
+    <!-- Default frequent behavior notes -->
+    <string-array name="default_behavior_notes">
+        <item>ก้าวร้าว</item>
+        <item>วิตกกังวล</item>
+        <item>ชอบกัด</item>
+        <item>ใจเย็น</item>
+        <item>มีพลังงานสูง</item>
+        <item>เป็นมิตร</item>
+        <item>ตื่นกลัว</item>
+        <item>ไวต่อเสียง</item>
+        <item>ขี้อาย</item>
+    </string-array>
 </resources>

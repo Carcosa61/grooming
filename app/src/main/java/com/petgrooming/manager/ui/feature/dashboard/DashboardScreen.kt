@@ -9,6 +9,7 @@ import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +33,7 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -51,6 +53,7 @@ import com.petgrooming.manager.data.local.entity.ServiceType
 import com.petgrooming.manager.ui.components.BookingSkeletonList
 import com.petgrooming.manager.ui.components.EmptyState
 import com.petgrooming.manager.ui.components.PetAvatar
+import com.petgrooming.manager.ui.components.PetDetailsDialog
 import com.petgrooming.manager.ui.components.StatusBadge
 import com.petgrooming.manager.ui.components.bookingStatusColor
 import com.petgrooming.manager.ui.theme.StatusColors
@@ -69,10 +72,23 @@ fun DashboardScreen(
     viewModel: DashboardViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
+    val petDetails by viewModel.petDetails.collectAsState()
 
     // Refresh data when screen becomes visible
     LaunchedEffect(Unit) {
         viewModel.loadDashboardData()
+    }
+
+    petDetails?.let { pet ->
+        PetDetailsDialog(
+            petName = pet.name,
+            weight = pet.weight?.let { "$it kg" },
+            allergies = pet.allergies,
+            medications = pet.medications,
+            behaviorNotes = pet.behaviorNotes,
+            notes = pet.notes,
+            onDismiss = viewModel::dismissPetDetails
+        )
     }
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -98,7 +114,8 @@ fun DashboardScreen(
                         onNavigateToBookings = onNavigateToBookings,
                         onNavigateToPets = onNavigateToPets,
                         onBookingLongPress = onNavigateToBookingEdit,
-                        onAddBooking = onNavigateToCreateBooking
+                        onAddBooking = onNavigateToCreateBooking,
+                        onShowPetDetails = viewModel::showPetDetails
                     )
                 }
             }
@@ -113,10 +130,11 @@ private fun DashboardContent(
     onNavigateToPets: () -> Unit,
     onBookingLongPress: (Long) -> Unit,
     onAddBooking: () -> Unit,
+    onShowPetDetails: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val inSalonCount = uiState.todaysBookings.count {
-        it.status == BookingStatus.CHECKED_IN || it.status == BookingStatus.GROOMING
+        it.status == BookingStatus.SCHEDULED
     }
 
     LazyColumn(
@@ -165,7 +183,8 @@ private fun DashboardContent(
             items(uiState.todaysBookings) { booking ->
                 BookingCard(
                     booking = booking,
-                    onLongPress = { onBookingLongPress(booking.id) }
+                    onLongPress = { onBookingLongPress(booking.id) },
+                    onShowPetDetails = { onShowPetDetails(booking.petId) }
                 )
             }
         }
@@ -404,7 +423,7 @@ private fun RebookingCard(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Brush.verticalGradient(gradient))
-                .padding(vertical = 16.dp, horizontal = 8.dp)
+                .padding(vertical = 10.dp, horizontal = 4.dp)
         ) {
             Column(
                 modifier = Modifier.fillMaxWidth(),
@@ -412,8 +431,8 @@ private fun RebookingCard(
             ) {
                 Box(
                     modifier = Modifier
-                        .size(44.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .size(24.dp)
+                        .clip(RoundedCornerShape(8.dp))
                         .background(Color.White.copy(alpha = 0.2f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -421,20 +440,22 @@ private fun RebookingCard(
                         imageVector = icon,
                         contentDescription = null,
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 Text(
                     text = count.toString(),
-                    style = MaterialTheme.typography.headlineMedium,
+                    style = MaterialTheme.typography.titleLarge,
                     fontWeight = FontWeight.Bold,
                     color = Color.White
                 )
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color.White.copy(alpha = 0.95f)
+                    color = Color.White.copy(alpha = 0.95f),
+                    maxLines = 1,
+                    softWrap = false
                 )
             }
         }
@@ -446,6 +467,7 @@ private fun RebookingCard(
 private fun BookingCard(
     booking: BookingWithDetails,
     onLongPress: () -> Unit,
+    onShowPetDetails: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val timeFormatter = DateTimeFormatter.ofPattern("HH:mm")
@@ -511,6 +533,12 @@ private fun BookingCard(
                     }
                     Spacer(modifier = Modifier.height(6.dp))
                     StatusBadge(status = booking.status)
+                    TextButton(
+                        onClick = onShowPetDetails,
+                        contentPadding = PaddingValues(0.dp)
+                    ) {
+                        Text(stringResource(R.string.pet_details))
+                    }
                 }
             }
         }

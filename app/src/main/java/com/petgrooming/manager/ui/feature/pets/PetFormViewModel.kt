@@ -12,6 +12,7 @@ import com.petgrooming.manager.data.local.entity.PetType
 import com.petgrooming.manager.data.util.ImageStorage
 import com.petgrooming.manager.domain.repository.CustomBreedRepository
 import com.petgrooming.manager.domain.repository.CustomColorRepository
+import com.petgrooming.manager.domain.repository.CustomListItemRepository
 import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -42,6 +43,15 @@ data class PetFormState(
     val allergies: String = "",
     val medications: String = "",
     val behaviorNotes: String = "",
+    val availableAllergies: List<String> = emptyList(),
+    val customAllergyInput: String = "",
+    val showCustomAllergyInput: Boolean = false,
+    val availableMedications: List<String> = emptyList(),
+    val customMedicationInput: String = "",
+    val showCustomMedicationInput: Boolean = false,
+    val availableBehaviorNotes: List<String> = emptyList(),
+    val customBehaviorInput: String = "",
+    val showCustomBehaviorInput: Boolean = false,
     val notes: String = "",
     val photoUri: String? = null,
     val isPhotoProcessing: Boolean = false,
@@ -134,6 +144,7 @@ class PetFormViewModel @Inject constructor(
     private val ownerRepository: OwnerRepository,
     private val customBreedRepository: CustomBreedRepository,
     private val customColorRepository: CustomColorRepository,
+    private val customListItemRepository: CustomListItemRepository,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -147,8 +158,26 @@ class PetFormViewModel @Inject constructor(
         loadOwners()
         loadBreedsForType(_uiState.value.petType)
         loadColors()
+        loadFrequentLists()
         if (petId > 0) {
             loadPet(petId)
+        }
+    }
+
+    private fun loadFrequentLists() {
+        viewModelScope.launch {
+            val otherLabel = context.getString(com.petgrooming.manager.R.string.pet_type_other)
+            val allergyDefaults = context.resources.getStringArray(com.petgrooming.manager.R.array.default_allergies).toList()
+            val medicationDefaults = context.resources.getStringArray(com.petgrooming.manager.R.array.default_medications).toList()
+            val behaviorDefaults = context.resources.getStringArray(com.petgrooming.manager.R.array.default_behavior_notes).toList()
+            val customAllergies = customListItemRepository.getValues(CustomListItemRepository.CATEGORY_ALLERGY)
+            val customMedications = customListItemRepository.getValues(CustomListItemRepository.CATEGORY_MEDICATION)
+            val customBehavior = customListItemRepository.getValues(CustomListItemRepository.CATEGORY_BEHAVIOR)
+            _uiState.value = _uiState.value.copy(
+                availableAllergies = (allergyDefaults + customAllergies).distinct().sorted() + listOf(otherLabel),
+                availableMedications = (medicationDefaults + customMedications).distinct().sorted() + listOf(otherLabel),
+                availableBehaviorNotes = (behaviorDefaults + customBehavior).distinct().sorted() + listOf(otherLabel)
+            )
         }
     }
 
@@ -374,15 +403,111 @@ class PetFormViewModel @Inject constructor(
     }
 
     fun updateAllergies(allergies: String) {
-        _uiState.value = _uiState.value.copy(allergies = allergies)
+        val otherLabel = context.getString(com.petgrooming.manager.R.string.pet_type_other)
+        if (allergies == otherLabel) {
+            _uiState.value = _uiState.value.copy(showCustomAllergyInput = true, allergies = "")
+        } else {
+            _uiState.value = _uiState.value.copy(
+                allergies = allergies,
+                showCustomAllergyInput = false,
+                customAllergyInput = ""
+            )
+        }
+    }
+
+    fun updateCustomAllergyInput(input: String) {
+        _uiState.value = _uiState.value.copy(customAllergyInput = input)
+    }
+
+    fun confirmCustomAllergy() {
+        val value = _uiState.value.customAllergyInput.trim()
+        if (value.isNotBlank()) {
+            viewModelScope.launch {
+                customListItemRepository.insertValue(CustomListItemRepository.CATEGORY_ALLERGY, value)
+                loadFrequentLists()
+                _uiState.value = _uiState.value.copy(
+                    allergies = value,
+                    showCustomAllergyInput = false,
+                    customAllergyInput = ""
+                )
+            }
+        }
+    }
+
+    fun cancelCustomAllergy() {
+        _uiState.value = _uiState.value.copy(showCustomAllergyInput = false, customAllergyInput = "")
     }
 
     fun updateMedications(medications: String) {
-        _uiState.value = _uiState.value.copy(medications = medications)
+        val otherLabel = context.getString(com.petgrooming.manager.R.string.pet_type_other)
+        if (medications == otherLabel) {
+            _uiState.value = _uiState.value.copy(showCustomMedicationInput = true, medications = "")
+        } else {
+            _uiState.value = _uiState.value.copy(
+                medications = medications,
+                showCustomMedicationInput = false,
+                customMedicationInput = ""
+            )
+        }
+    }
+
+    fun updateCustomMedicationInput(input: String) {
+        _uiState.value = _uiState.value.copy(customMedicationInput = input)
+    }
+
+    fun confirmCustomMedication() {
+        val value = _uiState.value.customMedicationInput.trim()
+        if (value.isNotBlank()) {
+            viewModelScope.launch {
+                customListItemRepository.insertValue(CustomListItemRepository.CATEGORY_MEDICATION, value)
+                loadFrequentLists()
+                _uiState.value = _uiState.value.copy(
+                    medications = value,
+                    showCustomMedicationInput = false,
+                    customMedicationInput = ""
+                )
+            }
+        }
+    }
+
+    fun cancelCustomMedication() {
+        _uiState.value = _uiState.value.copy(showCustomMedicationInput = false, customMedicationInput = "")
     }
 
     fun updateBehaviorNotes(notes: String) {
-        _uiState.value = _uiState.value.copy(behaviorNotes = notes)
+        val otherLabel = context.getString(com.petgrooming.manager.R.string.pet_type_other)
+        if (notes == otherLabel) {
+            _uiState.value = _uiState.value.copy(showCustomBehaviorInput = true, behaviorNotes = "")
+        } else {
+            _uiState.value = _uiState.value.copy(
+                behaviorNotes = notes,
+                showCustomBehaviorInput = false,
+                customBehaviorInput = ""
+            )
+        }
+    }
+
+    fun updateCustomBehaviorInput(input: String) {
+        _uiState.value = _uiState.value.copy(customBehaviorInput = input)
+    }
+
+    fun confirmCustomBehavior() {
+        val value = _uiState.value.customBehaviorInput.trim()
+        if (value.isNotBlank()) {
+            viewModelScope.launch {
+                customListItemRepository.insertValue(CustomListItemRepository.CATEGORY_BEHAVIOR, value)
+                loadFrequentLists()
+                _uiState.value = _uiState.value.copy(
+                    behaviorNotes = value,
+                    showCustomBehaviorInput = false,
+                    customBehaviorInput = ""
+                )
+            }
+        }
+    }
+
+    fun cancelCustomBehavior() {
+        _uiState.value = _uiState.value.copy(showCustomBehaviorInput = false, customBehaviorInput = "")
     }
 
     fun updateNotes(notes: String) {

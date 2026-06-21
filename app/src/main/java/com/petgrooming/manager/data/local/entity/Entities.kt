@@ -97,9 +97,6 @@ enum class ServiceType {
 
 enum class BookingStatus {
     SCHEDULED,
-    CHECKED_IN,
-    GROOMING,
-    READY_FOR_COLLECTION,
     COMPLETED,
     CANCELLED,
     NO_SHOW
@@ -149,5 +146,17 @@ data class CustomColorEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val colorName: String,
+    val createdAt: Long = System.currentTimeMillis()
+)
+
+@Entity(
+    tableName = "custom_list_items",
+    indices = [Index(value = ["category", "value"], unique = true)]
+)
+data class CustomListItemEntity(
+    @PrimaryKey(autoGenerate = true)
+    val id: Long = 0,
+    val category: String,
+    val value: String,
     val createdAt: Long = System.currentTimeMillis()
 )

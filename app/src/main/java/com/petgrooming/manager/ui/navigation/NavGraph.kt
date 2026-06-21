@@ -95,7 +95,8 @@ fun PetGroomingNavHost(
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
             )
         }
 
@@ -112,7 +113,8 @@ fun PetGroomingNavHost(
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
             )
         }
 
@@ -123,7 +125,8 @@ fun PetGroomingNavHost(
             BookingFormScreen(
                 onNavigateBack = { navController.popBackStack() },
                 onBookingSaved = { navController.popBackStack() },
-                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) }
+                onAddPet = { ownerId -> navController.navigate(Routes.petCreate(ownerId)) },
+                onEditPet = { petId -> navController.navigate(Routes.petEdit(petId)) }
             )
         }
 

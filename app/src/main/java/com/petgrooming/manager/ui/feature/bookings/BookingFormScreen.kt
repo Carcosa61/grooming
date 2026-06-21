@@ -1,5 +1,8 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -9,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -30,7 +34,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
@@ -40,8 +46,10 @@ import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormButtons
 import com.petgrooming.manager.ui.components.FormTextField
+import com.petgrooming.manager.ui.components.PetAvatar
 import com.petgrooming.manager.ui.components.PhotoPickerField
 import com.petgrooming.manager.ui.components.TimePickerField
+import com.petgrooming.manager.ui.theme.StatusColors
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -49,6 +57,7 @@ fun BookingFormScreen(
     onNavigateBack: () -> Unit,
     onBookingSaved: (Long) -> Unit,
     onAddPet: (Long?) -> Unit,
+    onEditPet: (Long) -> Unit,
     viewModel: BookingFormViewModel = hiltViewModel()
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -152,9 +161,32 @@ fun BookingFormScreen(
                         optionLabel = { it.pet.name },
                         modifier = Modifier.weight(1f)
                     )
+                    val selectedPhotoUri = uiState.selectedPet?.pet?.photoUri
+                    if (selectedPhotoUri != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                        PetAvatar(
+                            name = uiState.selectedPet?.pet?.name ?: "",
+                            photoUri = selectedPhotoUri,
+                            size = 44,
+                            modifier = Modifier.clickable {
+                                uiState.selectedPet?.pet?.id?.let { onEditPet(it) }
+                            }
+                        )
+                    }
                     Spacer(modifier = Modifier.width(8.dp))
-                    IconButton(onClick = { onAddPet(uiState.selectedOwner?.id) }) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier
+                            .clip(RoundedCornerShape(12.dp))
+                            .clickable { onAddPet(uiState.selectedOwner?.id) }
+                            .padding(horizontal = 4.dp, vertical = 4.dp)
+                    ) {
                         Icon(Icons.Default.Pets, contentDescription = stringResource(R.string.add_pet))
+                        Text(
+                            text = stringResource(R.string.add_pet),
+                            style = MaterialTheme.typography.labelSmall,
+                            textAlign = TextAlign.Center
+                        )
                     }
                 }
                 if (uiState.petError != null) {
@@ -216,34 +248,31 @@ fun BookingFormScreen(
                 // Status - only show when editing
                 if (uiState.id > 0) {
                     Spacer(modifier = Modifier.height(16.dp))
-                    
-                    DropdownField(
-                        selected = uiState.status,
-                        options = BookingStatus.entries,
-                        onOptionSelected = viewModel::updateStatus,
-                        label = stringResource(R.string.status),
-                        optionLabel = { status ->
-                            when (status) {
-                                BookingStatus.SCHEDULED -> stringResource(R.string.status_scheduled)
-                                BookingStatus.CHECKED_IN -> stringResource(R.string.status_checked_in)
-                                BookingStatus.GROOMING -> stringResource(R.string.status_grooming)
-                                BookingStatus.READY_FOR_COLLECTION -> stringResource(R.string.status_ready_for_collection)
-                                BookingStatus.COMPLETED -> stringResource(R.string.status_completed)
-                                BookingStatus.CANCELLED -> stringResource(R.string.status_cancelled)
-                                BookingStatus.NO_SHOW -> stringResource(R.string.status_no_show)
-                            }
-                        }
-                    )
+
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(12.dp))
+                            .background(StatusColors.Scheduled.copy(alpha = 0.12f))
+                            .padding(8.dp)
+                    ) {
+                        DropdownField(
+                            selected = uiState.status,
+                            options = BookingStatus.entries,
+                            onOptionSelected = viewModel::updateStatus,
+                            label = stringResource(R.string.status),
+                            optionLabel = { status ->
+                                when (status) {
+                                    BookingStatus.SCHEDULED -> stringResource(R.string.status_scheduled)
+                                    BookingStatus.COMPLETED -> stringResource(R.string.status_completed)
+                                    BookingStatus.CANCELLED -> stringResource(R.string.status_cancelled)
+                                    BookingStatus.NO_SHOW -> stringResource(R.string.status_no_show)
+                                }
+                            },
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                // Groomer Name
-                FormTextField(
-                    value = uiState.groomerName,
-                    onValueChange = viewModel::updateGroomerName,
-                    label = stringResource(R.string.groomer_name)
-                )
 
                 Spacer(modifier = Modifier.height(16.dp))
 

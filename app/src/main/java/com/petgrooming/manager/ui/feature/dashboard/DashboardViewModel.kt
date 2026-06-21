@@ -67,7 +67,20 @@ class DashboardViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(DashboardUiState())
     val uiState: StateFlow<DashboardUiState> = _uiState.asStateFlow()
-    
+
+    private val _petDetails = MutableStateFlow<com.petgrooming.manager.data.local.entity.PetEntity?>(null)
+    val petDetails: StateFlow<com.petgrooming.manager.data.local.entity.PetEntity?> = _petDetails.asStateFlow()
+
+    fun showPetDetails(petId: Long) {
+        viewModelScope.launch {
+            _petDetails.value = petRepository.getPetById(petId)
+        }
+    }
+
+    fun dismissPetDetails() {
+        _petDetails.value = null
+    }
+
     private var collectionJob: Job? = null
 
     init {

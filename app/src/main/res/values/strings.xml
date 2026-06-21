@@ -217,4 +217,57 @@
     <!-- Settings Sections -->
     <string name="settings_about">About</string>
     <string name="settings_version">Version %1$s</string>
+
+    <!-- Pet Details Popup -->
+    <string name="pet_details">Pet Details</string>
+    <string name="no_details_available">No details available</string>
+
+    <!-- Sorting -->
+    <string name="sort_by">Sort by</string>
+    <string name="sort_name_asc">Name (A-Z)</string>
+    <string name="sort_name_desc">Name (Z-A)</string>
+    <string name="sort_last_visit">Last Visit</string>
+
+    <!-- Custom list inputs -->
+    <string name="enter_custom_allergy">Enter allergy</string>
+    <string name="enter_custom_medication">Enter medication</string>
+    <string name="enter_custom_behavior">Enter behavior note</string>
+
+    <!-- Default frequent allergies -->
+    <string-array name="default_allergies">
+        <item>Chicken</item>
+        <item>Corn</item>
+        <item>Dairy</item>
+        <item>Fleas</item>
+        <item>Grass</item>
+        <item>Pollen</item>
+        <item>Shampoo/Fragrance</item>
+        <item>Soy</item>
+        <item>Wheat</item>
+    </string-array>
+
+    <!-- Default frequent medications -->
+    <string-array name="default_medications">
+        <item>Antibiotics</item>
+        <item>Antifungal</item>
+        <item>Dewormer</item>
+        <item>Flea &amp; Tick Prevention</item>
+        <item>Heartworm Prevention</item>
+        <item>Pain Relief</item>
+        <item>Steroids</item>
+        <item>Vaccination Due</item>
+    </string-array>
+
+    <!-- Default frequent behavior notes -->
+    <string-array name="default_behavior_notes">
+        <item>Aggressive</item>
+        <item>Anxious</item>
+        <item>Bites</item>
+        <item>Calm</item>
+        <item>Energetic</item>
+        <item>Friendly</item>
+        <item>Nervous</item>
+        <item>Sensitive to Noise</item>
+        <item>Shy</item>
+    </string-array>
 </resources>

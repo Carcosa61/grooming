@@ -6,6 +6,7 @@ import com.petgrooming.manager.data.local.PetGroomingDatabase
 import com.petgrooming.manager.data.local.dao.BookingDao
 import com.petgrooming.manager.data.local.dao.CustomBreedDao
 import com.petgrooming.manager.data.local.dao.CustomColorDao
+import com.petgrooming.manager.data.local.dao.CustomListItemDao
 import com.petgrooming.manager.data.local.dao.OwnerDao
 import com.petgrooming.manager.data.local.dao.PetDao
 import com.petgrooming.manager.data.local.dao.RebookingReminderDao
@@ -33,7 +34,8 @@ object DatabaseModule {
             .addMigrations(
                 PetGroomingDatabase.MIGRATION_1_2,
                 PetGroomingDatabase.MIGRATION_2_3,
-                PetGroomingDatabase.MIGRATION_3_4
+                PetGroomingDatabase.MIGRATION_3_4,
+                PetGroomingDatabase.MIGRATION_4_5
             )
             .build()
     }
@@ -66,5 +68,10 @@ object DatabaseModule {
     @Provides
     fun provideCustomColorDao(database: PetGroomingDatabase): CustomColorDao {
         return database.customColorDao()
+    }
+
+    @Provides
+    fun provideCustomListItemDao(database: PetGroomingDatabase): CustomListItemDao {
+        return database.customListItemDao()
     }
 }

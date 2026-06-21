@@ -34,6 +34,9 @@ interface BookingDao {
     @Query("UPDATE bookings SET status = :status, updatedAt = :updatedAt WHERE id = :id")
     suspend fun updateBookingStatus(id: Long, status: BookingStatus, updatedAt: Long = System.currentTimeMillis())
 
+    @Query("SELECT petId, MAX(appointmentDate) as lastVisit FROM bookings GROUP BY petId")
+    suspend fun getLastVisitDates(): List<PetLastVisit>
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertBooking(booking: BookingEntity): Long
 
@@ -43,3 +46,8 @@ interface BookingDao {
     @Delete
     suspend fun deleteBooking(booking: BookingEntity)
 }
+
+data class PetLastVisit(
+    val petId: Long,
+    val lastVisit: LocalDate?
+)

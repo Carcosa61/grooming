@@ -25,9 +25,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -36,8 +40,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.petgrooming.manager.R
 import com.petgrooming.manager.data.local.entity.PetEntity
+import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.EmptyState
 import com.petgrooming.manager.ui.components.PetAvatar
+import com.petgrooming.manager.ui.components.PetDetailsDialog
 
 @Composable
 fun PetsScreen(
@@ -82,6 +88,7 @@ fun PetsScreen(
                     PetsContent(
                         uiState = uiState,
                         onSearchQueryChange = viewModel::searchPets,
+                        onSortChange = viewModel::setSortOrder,
                         onPetClick = onNavigateToPetDetail
                     )
                 }
@@ -94,6 +101,7 @@ fun PetsScreen(
 private fun PetsContent(
     uiState: PetsUiState,
     onSearchQueryChange: (String) -> Unit,
+    onSortChange: (PetSortOrder) -> Unit,
     onPetClick: (Long) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -127,6 +135,21 @@ private fun PetsContent(
             )
         }
 
+        item {
+            DropdownField(
+                selected = uiState.sortOrder,
+                options = listOf(
+                    PetSortOrder.NAME_ASC,
+                    PetSortOrder.NAME_DESC,
+                    PetSortOrder.LAST_VISIT
+                ),
+                onOptionSelected = onSortChange,
+                label = stringResource(R.string.sort_by),
+                optionLabel = { sortOrderLabel(it) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
         if (uiState.pets.isEmpty()) {
             item {
                 if (uiState.searchQuery.isNotEmpty()) {
@@ -155,11 +178,32 @@ private fun PetsContent(
 }
 
 @Composable
+private fun sortOrderLabel(order: PetSortOrder): String = when (order) {
+    PetSortOrder.NAME_ASC -> stringResource(R.string.sort_name_asc)
+    PetSortOrder.NAME_DESC -> stringResource(R.string.sort_name_desc)
+    PetSortOrder.LAST_VISIT -> stringResource(R.string.sort_last_visit)
+}
+
+@Composable
 private fun PetListItem(
     pet: PetEntity,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
+    var showDetails by remember { mutableStateOf(false) }
+
+    if (showDetails) {
+        PetDetailsDialog(
+            petName = pet.name,
+            weight = pet.weight?.let { "$it kg" },
+            allergies = pet.allergies,
+            medications = pet.medications,
+            behaviorNotes = pet.behaviorNotes,
+            notes = pet.notes,
+            onDismiss = { showDetails = false }
+        )
+    }
+
     Card(
         onClick = onClick,
         modifier = modifier.fillMaxWidth()
@@ -192,6 +236,12 @@ private fun PetListItem(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                         maxLines = 1
                     )
+                }
+                TextButton(
+                    onClick = { showDetails = true },
+                    contentPadding = androidx.compose.foundation.layout.PaddingValues(0.dp)
+                ) {
+                    Text(stringResource(R.string.pet_details))
                 }
             }
         }

@@ -362,35 +362,110 @@ fun PetFormScreen(
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Allergies
-                FormTextField(
-                    value = uiState.allergies,
-                    onValueChange = viewModel::updateAllergies,
-                    label = stringResource(R.string.allergies),
-                    singleLine = false,
-                    maxLines = 3
-                )
+                if (uiState.showCustomAllergyInput) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.customAllergyInput,
+                            onValueChange = viewModel::updateCustomAllergyInput,
+                            label = { Text(stringResource(R.string.enter_custom_allergy)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        IconButton(
+                            onClick = viewModel::confirmCustomAllergy,
+                            enabled = uiState.customAllergyInput.isNotBlank()
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.confirm))
+                        }
+                        IconButton(onClick = viewModel::cancelCustomAllergy) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                } else {
+                    DropdownField(
+                        selected = uiState.allergies.ifBlank { null },
+                        options = uiState.availableAllergies,
+                        onOptionSelected = viewModel::updateAllergies,
+                        label = stringResource(R.string.allergies),
+                        optionLabel = { it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Medications
-                FormTextField(
-                    value = uiState.medications,
-                    onValueChange = viewModel::updateMedications,
-                    label = stringResource(R.string.medications),
-                    singleLine = false,
-                    maxLines = 3
-                )
+                if (uiState.showCustomMedicationInput) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.customMedicationInput,
+                            onValueChange = viewModel::updateCustomMedicationInput,
+                            label = { Text(stringResource(R.string.enter_custom_medication)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        IconButton(
+                            onClick = viewModel::confirmCustomMedication,
+                            enabled = uiState.customMedicationInput.isNotBlank()
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.confirm))
+                        }
+                        IconButton(onClick = viewModel::cancelCustomMedication) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                } else {
+                    DropdownField(
+                        selected = uiState.medications.ifBlank { null },
+                        options = uiState.availableMedications,
+                        onOptionSelected = viewModel::updateMedications,
+                        label = stringResource(R.string.medications),
+                        optionLabel = { it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 
                 // Behavior Notes
-                FormTextField(
-                    value = uiState.behaviorNotes,
-                    onValueChange = viewModel::updateBehaviorNotes,
-                    label = stringResource(R.string.behavior_notes),
-                    singleLine = false,
-                    maxLines = 4
-                )
+                if (uiState.showCustomBehaviorInput) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        OutlinedTextField(
+                            value = uiState.customBehaviorInput,
+                            onValueChange = viewModel::updateCustomBehaviorInput,
+                            label = { Text(stringResource(R.string.enter_custom_behavior)) },
+                            modifier = Modifier.weight(1f),
+                            singleLine = true
+                        )
+                        IconButton(
+                            onClick = viewModel::confirmCustomBehavior,
+                            enabled = uiState.customBehaviorInput.isNotBlank()
+                        ) {
+                            Icon(Icons.Default.Check, contentDescription = stringResource(R.string.confirm))
+                        }
+                        IconButton(onClick = viewModel::cancelCustomBehavior) {
+                            Icon(Icons.Default.Close, contentDescription = stringResource(R.string.cancel))
+                        }
+                    }
+                } else {
+                    DropdownField(
+                        selected = uiState.behaviorNotes.ifBlank { null },
+                        options = uiState.availableBehaviorNotes,
+                        onOptionSelected = viewModel::updateBehaviorNotes,
+                        label = stringResource(R.string.behavior_notes),
+                        optionLabel = { it },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 Spacer(modifier = Modifier.height(16.dp))
 

@@ -12,6 +12,7 @@ interface BookingRepository {
     fun getBookingsByPet(petId: Long): Flow<List<BookingEntity>>
     fun getBookingsByStatus(status: BookingStatus): Flow<List<BookingEntity>>
     suspend fun getBookingById(id: Long): BookingEntity?
+    suspend fun getLastVisitDates(): Map<Long, LocalDate>
     suspend fun insertBooking(booking: BookingEntity): Long
     suspend fun updateBooking(booking: BookingEntity)
     suspend fun updateBookingStatus(id: Long, status: BookingStatus)

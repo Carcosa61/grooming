@@ -44,6 +44,8 @@ class Converters {
     fun fromBookingStatus(status: BookingStatus?): String? = status?.name
 
     @TypeConverter
-    fun toBookingStatus(statusString: String?): BookingStatus? = 
-        statusString?.let { BookingStatus.valueOf(it) }
+    fun toBookingStatus(statusString: String?): BookingStatus? =
+        statusString?.let {
+            runCatching { BookingStatus.valueOf(it) }.getOrDefault(BookingStatus.SCHEDULED)
+        }
 }

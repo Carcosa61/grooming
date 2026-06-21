@@ -116,9 +116,6 @@ fun PetAvatar(
 /** Returns the brand color associated with a booking status. */
 fun bookingStatusColor(status: BookingStatus): Color = when (status) {
     BookingStatus.SCHEDULED -> StatusColors.Scheduled
-    BookingStatus.CHECKED_IN -> StatusColors.CheckedIn
-    BookingStatus.GROOMING -> StatusColors.Grooming
-    BookingStatus.READY_FOR_COLLECTION -> StatusColors.ReadyForCollection
     BookingStatus.COMPLETED -> StatusColors.Completed
     BookingStatus.CANCELLED -> StatusColors.Cancelled
     BookingStatus.NO_SHOW -> StatusColors.NoShow
@@ -127,9 +124,6 @@ fun bookingStatusColor(status: BookingStatus): Color = when (status) {
 /** Returns a representative icon for a booking status. */
 fun bookingStatusIcon(status: BookingStatus): ImageVector = when (status) {
     BookingStatus.SCHEDULED -> Icons.Default.Schedule
-    BookingStatus.CHECKED_IN -> Icons.Default.HowToReg
-    BookingStatus.GROOMING -> Icons.Default.ContentCut
-    BookingStatus.READY_FOR_COLLECTION -> Icons.Default.Notifications
     BookingStatus.COMPLETED -> Icons.Default.CheckCircle
     BookingStatus.CANCELLED -> Icons.Default.Close
     BookingStatus.NO_SHOW -> Icons.Default.EventBusy
@@ -139,9 +133,6 @@ fun bookingStatusIcon(status: BookingStatus): ImageVector = when (status) {
 @Composable
 fun bookingStatusLabel(status: BookingStatus): String = when (status) {
     BookingStatus.SCHEDULED -> stringResource(R.string.status_scheduled)
-    BookingStatus.CHECKED_IN -> stringResource(R.string.status_checked_in)
-    BookingStatus.GROOMING -> stringResource(R.string.status_grooming)
-    BookingStatus.READY_FOR_COLLECTION -> stringResource(R.string.status_ready_for_collection)
     BookingStatus.COMPLETED -> stringResource(R.string.status_completed)
     BookingStatus.CANCELLED -> stringResource(R.string.status_cancelled)
     BookingStatus.NO_SHOW -> stringResource(R.string.status_no_show)

@@ -37,7 +37,6 @@ data class BookingFormState(
     val serviceType: ServiceType = ServiceType.FULL_GROOM,
     val status: BookingStatus = BookingStatus.SCHEDULED,
     val originalStatus: BookingStatus = BookingStatus.SCHEDULED,
-    val groomerName: String = "",
     val notes: String = "",
     val beforePhotoUri: String? = null,
     val afterPhotoUri: String? = null,
@@ -162,7 +161,6 @@ class BookingFormViewModel @Inject constructor(
                         serviceType = booking.serviceType,
                         status = booking.status,
                         originalStatus = booking.status,
-                        groomerName = booking.groomerName ?: "",
                         notes = booking.notes ?: "",
                         beforePhotoUri = booking.beforePhotoUri,
                         afterPhotoUri = booking.afterPhotoUri,
@@ -214,10 +212,6 @@ class BookingFormViewModel @Inject constructor(
 
     fun updateServiceType(serviceType: ServiceType) {
         _uiState.value = _uiState.value.copy(serviceType = serviceType)
-    }
-
-    fun updateGroomerName(name: String) {
-        _uiState.value = _uiState.value.copy(groomerName = name)
     }
 
     fun updateNotes(notes: String) {
@@ -288,7 +282,6 @@ class BookingFormViewModel @Inject constructor(
                     appointmentTime = state.appointmentTime,
                     serviceType = state.serviceType,
                     status = state.status,
-                    groomerName = state.groomerName.trim().ifBlank { null },
                     notes = state.notes.trim().ifBlank { null },
                     beforePhotoUri = state.beforePhotoUri,
                     afterPhotoUri = state.afterPhotoUri,

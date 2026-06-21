@@ -35,6 +35,11 @@ class BookingRepositoryImpl @Inject constructor(
     override suspend fun getBookingById(id: Long): BookingEntity? =
         bookingDao.getBookingById(id)
 
+    override suspend fun getLastVisitDates(): Map<Long, LocalDate> =
+        bookingDao.getLastVisitDates()
+            .mapNotNull { row -> row.lastVisit?.let { row.petId to it } }
+            .toMap()
+
     override suspend fun insertBooking(booking: BookingEntity): Long =
         bookingDao.insertBooking(booking)
 
