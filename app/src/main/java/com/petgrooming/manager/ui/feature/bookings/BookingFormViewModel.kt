@@ -8,6 +8,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.petgrooming.manager.data.local.entity.BookingEntity
 import com.petgrooming.manager.data.local.entity.BookingStatus
+import com.petgrooming.manager.data.local.entity.Gender
 import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.PetEntity
@@ -69,11 +70,25 @@ data class BookingFormState(
     val createForOwner: OwnerEntity? = null,
     val draftOwnerName: String = "",
     val draftOwnerMobile: String = "",
+    val draftOwnerLineId: String = "",
     val draftPetName: String = "",
     val draftPetType: PetType = PetType.DOG,
     val draftOwnerNameError: String? = null,
     val draftOwnerMobileError: String? = null,
-    val draftPetNameError: String? = null
+    val draftPetNameError: String? = null,
+    // Optional pet details captured during onboarding (mirrors the Edit Pet page)
+    val showMoreDetails: Boolean = false,
+    val draftPhotoUri: String? = null,
+    val isDraftPhotoProcessing: Boolean = false,
+    val draftBreed: String = "",
+    val draftDateOfBirth: LocalDate? = null,
+    val draftGender: Gender? = null,
+    val draftWeight: String = "",
+    val draftColor: String = "",
+    val draftAllergies: String = "",
+    val draftMedications: String = "",
+    val draftBehaviorNotes: String = "",
+    val draftNotes: String = ""
 )
 
 data class PetWithOwner(
@@ -327,11 +342,24 @@ class BookingFormViewModel @Inject constructor(
             createForOwner = null,
             draftOwnerName = "",
             draftOwnerMobile = "",
+            draftOwnerLineId = "",
             draftPetName = "",
             draftPetType = PetType.DOG,
             draftOwnerNameError = null,
             draftOwnerMobileError = null,
-            draftPetNameError = null
+            draftPetNameError = null,
+            showMoreDetails = false,
+            draftPhotoUri = null,
+            isDraftPhotoProcessing = false,
+            draftBreed = "",
+            draftDateOfBirth = null,
+            draftGender = null,
+            draftWeight = "",
+            draftColor = "",
+            draftAllergies = "",
+            draftMedications = "",
+            draftBehaviorNotes = "",
+            draftNotes = ""
         )
     }
 
@@ -342,12 +370,28 @@ class BookingFormViewModel @Inject constructor(
             createForOwner = owner,
             draftPetName = "",
             draftPetType = PetType.DOG,
-            draftPetNameError = null
+            draftPetNameError = null,
+            showMoreDetails = false,
+            draftPhotoUri = null,
+            isDraftPhotoProcessing = false,
+            draftBreed = "",
+            draftDateOfBirth = null,
+            draftGender = null,
+            draftWeight = "",
+            draftColor = "",
+            draftAllergies = "",
+            draftMedications = "",
+            draftBehaviorNotes = "",
+            draftNotes = ""
         )
     }
 
     fun closeCreateSheet() {
         _uiState.value = _uiState.value.copy(showCreateSheet = false)
+    }
+
+    fun toggleMoreDetails() {
+        _uiState.value = _uiState.value.copy(showMoreDetails = !_uiState.value.showMoreDetails)
     }
 
     fun updateDraftOwnerName(name: String) {
@@ -358,12 +402,67 @@ class BookingFormViewModel @Inject constructor(
         _uiState.value = _uiState.value.copy(draftOwnerMobile = mobile, draftOwnerMobileError = null)
     }
 
+    fun updateDraftOwnerLineId(lineId: String) {
+        _uiState.value = _uiState.value.copy(draftOwnerLineId = lineId)
+    }
+
     fun updateDraftPetName(name: String) {
         _uiState.value = _uiState.value.copy(draftPetName = name, draftPetNameError = null)
     }
 
     fun updateDraftPetType(type: PetType) {
         _uiState.value = _uiState.value.copy(draftPetType = type)
+    }
+
+    fun updateDraftBreed(breed: String) {
+        _uiState.value = _uiState.value.copy(draftBreed = breed)
+    }
+
+    fun updateDraftDateOfBirth(date: LocalDate) {
+        _uiState.value = _uiState.value.copy(draftDateOfBirth = date)
+    }
+
+    fun updateDraftGender(gender: Gender) {
+        _uiState.value = _uiState.value.copy(draftGender = gender)
+    }
+
+    fun updateDraftWeight(weight: String) {
+        _uiState.value = _uiState.value.copy(draftWeight = weight)
+    }
+
+    fun updateDraftColor(color: String) {
+        _uiState.value = _uiState.value.copy(draftColor = color)
+    }
+
+    fun updateDraftAllergies(value: String) {
+        _uiState.value = _uiState.value.copy(draftAllergies = value)
+    }
+
+    fun updateDraftMedications(value: String) {
+        _uiState.value = _uiState.value.copy(draftMedications = value)
+    }
+
+    fun updateDraftBehaviorNotes(value: String) {
+        _uiState.value = _uiState.value.copy(draftBehaviorNotes = value)
+    }
+
+    fun updateDraftNotes(value: String) {
+        _uiState.value = _uiState.value.copy(draftNotes = value)
+    }
+
+    fun onDraftPhotoSelected(uri: Uri) {
+        viewModelScope.launch {
+            _uiState.value = _uiState.value.copy(isDraftPhotoProcessing = true)
+            val path = ImageStorage.saveImage(context, uri)
+            _uiState.value = _uiState.value.copy(
+                draftPhotoUri = path ?: _uiState.value.draftPhotoUri,
+                isDraftPhotoProcessing = false
+            )
+        }
+    }
+
+    fun onDraftPhotoRemoved() {
+        _uiState.value = _uiState.value.copy(draftPhotoUri = null)
     }
 
     fun confirmCreate() {
@@ -391,7 +490,8 @@ class BookingFormViewModel @Inject constructor(
                 val owner: OwnerEntity = if (s.createForOwner == null) {
                     val newOwner = OwnerEntity(
                         name = s.draftOwnerName.trim(),
-                        mobileNumber = s.draftOwnerMobile.trim()
+                        mobileNumber = s.draftOwnerMobile.trim(),
+                        lineId = s.draftOwnerLineId.trim().ifBlank { null }
                     )
                     val ownerId = ownerRepository.insertOwner(newOwner)
                     newOwner.copy(id = ownerId)
@@ -402,7 +502,16 @@ class BookingFormViewModel @Inject constructor(
                     ownerId = owner.id,
                     name = s.draftPetName.trim(),
                     petType = s.draftPetType,
-                    breed = ""
+                    breed = s.draftBreed.trim(),
+                    dateOfBirth = s.draftDateOfBirth,
+                    gender = s.draftGender,
+                    weight = s.draftWeight.trim().toFloatOrNull(),
+                    color = s.draftColor.trim().ifBlank { null },
+                    allergies = s.draftAllergies.trim().ifBlank { null },
+                    medications = s.draftMedications.trim().ifBlank { null },
+                    behaviorNotes = s.draftBehaviorNotes.trim().ifBlank { null },
+                    notes = s.draftNotes.trim().ifBlank { null },
+                    photoUri = s.draftPhotoUri
                 )
                 val petId = petRepository.insertPet(newPet)
                 val petWithOwner = PetWithOwner(

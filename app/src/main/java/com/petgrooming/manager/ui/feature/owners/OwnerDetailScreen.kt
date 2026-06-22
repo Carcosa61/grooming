@@ -124,6 +124,14 @@ fun OwnerDetailScreen(
                                         color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
+                                owner.lineId?.takeIf { it.isNotBlank() }?.let { lineId ->
+                                    Spacer(Modifier.height(4.dp))
+                                    Text(
+                                        text = stringResource(R.string.line_id_value, lineId),
+                                        style = MaterialTheme.typography.bodyMedium,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                             }
                         }
                     }

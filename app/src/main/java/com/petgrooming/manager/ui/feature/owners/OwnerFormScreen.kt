@@ -149,6 +149,15 @@ fun OwnerFormScreen(
                     modifier = Modifier.fillMaxWidth()
                 )
 
+                Spacer(modifier = Modifier.height(16.dp))
+
+                FormTextField(
+                    value = uiState.lineId,
+                    onValueChange = viewModel::updateLineId,
+                    label = stringResource(R.string.line_id_optional),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
                 if (uiState.error != null) {
                     Spacer(modifier = Modifier.height(16.dp))
                     Text(

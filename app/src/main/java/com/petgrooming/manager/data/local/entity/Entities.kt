@@ -14,6 +14,7 @@ data class OwnerEntity(
     val name: String,
     val mobileNumber: String,
     val email: String? = null,
+    val lineId: String? = null,
     val createdAt: Long = System.currentTimeMillis(),
     val updatedAt: Long = System.currentTimeMillis()
 )

@@ -17,6 +17,7 @@ data class OwnerFormState(
     val name: String = "",
     val mobileNumber: String = "",
     val email: String = "",
+    val lineId: String = "",
     val isLoading: Boolean = false,
     val isSaved: Boolean = false,
     val isDeleted: Boolean = false,
@@ -53,6 +54,7 @@ class OwnerFormViewModel @Inject constructor(
                         name = owner.name,
                         mobileNumber = owner.mobileNumber,
                         email = owner.email ?: "",
+                        lineId = owner.lineId ?: "",
                         isLoading = false
                     )
                 }
@@ -81,6 +83,10 @@ class OwnerFormViewModel @Inject constructor(
 
     fun updateEmail(email: String) {
         _uiState.value = _uiState.value.copy(email = email)
+    }
+
+    fun updateLineId(lineId: String) {
+        _uiState.value = _uiState.value.copy(lineId = lineId)
     }
 
     fun save() {
@@ -112,6 +118,7 @@ class OwnerFormViewModel @Inject constructor(
                     name = state.name.trim(),
                     mobileNumber = state.mobileNumber.trim(),
                     email = state.email.trim().ifBlank { null },
+                    lineId = state.lineId.trim().ifBlank { null },
                     updatedAt = System.currentTimeMillis()
                 )
                 

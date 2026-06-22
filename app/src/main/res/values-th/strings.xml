@@ -149,6 +149,9 @@
     <string name="select_owner">เลือกเจ้าของ</string>
     <string name="select_pet">เลือกสัตว์เลี้ยง</string>
     <string name="email_optional">อีเมล (ไม่บังคับ)</string>
+    <string name="line_id_optional">Line ID (ไม่บังคับ)</string>
+    <string name="line_id_value">Line ID: %1$s</string>
+    <string name="more_details">รายละเอียดเพิ่มเติม</string>
     <string name="weight_kg">น้ำหนัก (กก.)</string>
     <string name="groomer_name">ชื่อช่างตัดขน</string>
 

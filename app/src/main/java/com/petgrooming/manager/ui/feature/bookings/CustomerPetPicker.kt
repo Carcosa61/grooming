@@ -1,5 +1,6 @@
 package com.petgrooming.manager.ui.feature.bookings
 
+import android.net.Uri
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -12,13 +13,18 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ChevronRight
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.PersonAdd
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -33,13 +39,18 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.petgrooming.manager.R
+import com.petgrooming.manager.data.local.entity.Gender
 import com.petgrooming.manager.data.local.entity.OwnerEntity
 import com.petgrooming.manager.data.local.entity.PetType
+import com.petgrooming.manager.ui.components.AvatarPhotoPicker
+import com.petgrooming.manager.ui.components.DatePickerField
 import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormTextField
 import com.petgrooming.manager.ui.components.PetAvatar
+import java.time.LocalDate
 
 @Composable
 fun petTypeLabel(type: PetType): String = when (type) {
@@ -239,8 +250,21 @@ fun InlineCreateSheet(
     uiState: BookingFormState,
     onOwnerNameChange: (String) -> Unit,
     onOwnerMobileChange: (String) -> Unit,
+    onOwnerLineIdChange: (String) -> Unit,
     onPetNameChange: (String) -> Unit,
     onPetTypeChange: (PetType) -> Unit,
+    onPhotoSelected: (Uri) -> Unit,
+    onPhotoRemoved: () -> Unit,
+    onToggleMoreDetails: () -> Unit,
+    onBreedChange: (String) -> Unit,
+    onDateOfBirthChange: (LocalDate) -> Unit,
+    onGenderChange: (Gender) -> Unit,
+    onWeightChange: (String) -> Unit,
+    onColorChange: (String) -> Unit,
+    onAllergiesChange: (String) -> Unit,
+    onMedicationsChange: (String) -> Unit,
+    onBehaviorNotesChange: (String) -> Unit,
+    onNotesChange: (String) -> Unit,
     onConfirm: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -251,6 +275,7 @@ fun InlineCreateSheet(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
                 .padding(bottom = 24.dp),
             verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -277,10 +302,23 @@ fun InlineCreateSheet(
                     value = uiState.draftOwnerMobile,
                     onValueChange = onOwnerMobileChange,
                     label = stringResource(R.string.mobile_number),
+                    keyboardType = KeyboardType.Phone,
                     isError = uiState.draftOwnerMobileError != null,
                     errorMessage = uiState.draftOwnerMobileError
                 )
+                FormTextField(
+                    value = uiState.draftOwnerLineId,
+                    onValueChange = onOwnerLineIdChange,
+                    label = stringResource(R.string.line_id_optional)
+                )
             }
+
+            AvatarPhotoPicker(
+                name = uiState.draftPetName.ifBlank { "?" },
+                photoUri = uiState.draftPhotoUri,
+                onPhotoSelected = onPhotoSelected,
+                onPhotoRemoved = onPhotoRemoved
+            )
 
             FormTextField(
                 value = uiState.draftPetName,
@@ -298,6 +336,94 @@ fun InlineCreateSheet(
                 optionLabel = { petTypeLabel(it) },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            // Expandable extra details, mirroring the Edit Pet page.
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable { onToggleMoreDetails() }
+                    .padding(vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.more_details),
+                    style = MaterialTheme.typography.titleMedium,
+                    modifier = Modifier.weight(1f)
+                )
+                Icon(
+                    imageVector = if (uiState.showMoreDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = stringResource(R.string.more_details)
+                )
+            }
+
+            if (uiState.showMoreDetails) {
+                FormTextField(
+                    value = uiState.draftBreed,
+                    onValueChange = onBreedChange,
+                    label = stringResource(R.string.pet_breed)
+                )
+
+                DatePickerField(
+                    selectedDate = uiState.draftDateOfBirth,
+                    onDateSelected = onDateOfBirthChange,
+                    label = stringResource(R.string.date_of_birth),
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        selected = uiState.draftGender == Gender.MALE,
+                        onClick = { onGenderChange(Gender.MALE) },
+                        label = { Text(stringResource(R.string.gender_male)) }
+                    )
+                    FilterChip(
+                        selected = uiState.draftGender == Gender.FEMALE,
+                        onClick = { onGenderChange(Gender.FEMALE) },
+                        label = { Text(stringResource(R.string.gender_female)) }
+                    )
+                }
+
+                FormTextField(
+                    value = uiState.draftWeight,
+                    onValueChange = onWeightChange,
+                    label = stringResource(R.string.weight_kg),
+                    keyboardType = KeyboardType.Decimal
+                )
+
+                FormTextField(
+                    value = uiState.draftColor,
+                    onValueChange = onColorChange,
+                    label = stringResource(R.string.color)
+                )
+
+                FormTextField(
+                    value = uiState.draftAllergies,
+                    onValueChange = onAllergiesChange,
+                    label = stringResource(R.string.allergies)
+                )
+
+                FormTextField(
+                    value = uiState.draftMedications,
+                    onValueChange = onMedicationsChange,
+                    label = stringResource(R.string.medications)
+                )
+
+                FormTextField(
+                    value = uiState.draftBehaviorNotes,
+                    onValueChange = onBehaviorNotesChange,
+                    label = stringResource(R.string.behavior_notes)
+                )
+
+                FormTextField(
+                    value = uiState.draftNotes,
+                    onValueChange = onNotesChange,
+                    label = stringResource(R.string.pet_notes)
+                )
+            }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),

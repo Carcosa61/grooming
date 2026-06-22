@@ -33,7 +33,7 @@ import com.petgrooming.manager.data.local.entity.ServicePriceEntity
         CustomListItemEntity::class,
         ServicePriceEntity::class
     ],
-    version = 6,
+    version = 7,
     exportSchema = true
 )
 @TypeConverters(Converters::class)
@@ -126,6 +126,13 @@ abstract class PetGroomingDatabase : RoomDatabase() {
                 db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('NAIL_TRIM', 150.0)")
                 db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('EAR_CLEANING', 150.0)")
                 db.execSQL("INSERT OR IGNORE INTO service_prices (serviceType, price) VALUES ('CUSTOM', 0.0)")
+            }
+        }
+
+        val MIGRATION_6_7 = object : Migration(6, 7) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // Add Line ID contact detail to owners
+                db.execSQL("ALTER TABLE owners ADD COLUMN lineId TEXT")
             }
         }
     }
