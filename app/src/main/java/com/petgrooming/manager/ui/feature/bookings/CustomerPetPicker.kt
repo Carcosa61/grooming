@@ -37,6 +37,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -51,6 +52,8 @@ import com.petgrooming.manager.ui.components.DropdownField
 import com.petgrooming.manager.ui.components.FormTextField
 import com.petgrooming.manager.ui.components.PetAvatar
 import java.time.LocalDate
+
+private val MoreDetailsGreen = Color(0xFF2E7D32)
 
 @Composable
 fun petTypeLabel(type: PetType): String = when (type) {
@@ -317,7 +320,8 @@ fun InlineCreateSheet(
                 name = uiState.draftPetName.ifBlank { "?" },
                 photoUri = uiState.draftPhotoUri,
                 onPhotoSelected = onPhotoSelected,
-                onPhotoRemoved = onPhotoRemoved
+                onPhotoRemoved = onPhotoRemoved,
+                addLabel = stringResource(R.string.pet_photo)
             )
 
             FormTextField(
@@ -347,13 +351,15 @@ fun InlineCreateSheet(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = stringResource(R.string.more_details),
+                    text = stringResource(R.string.add_more_details),
                     style = MaterialTheme.typography.titleMedium,
+                    color = MoreDetailsGreen,
                     modifier = Modifier.weight(1f)
                 )
                 Icon(
                     imageVector = if (uiState.showMoreDetails) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
-                    contentDescription = stringResource(R.string.more_details)
+                    contentDescription = stringResource(R.string.add_more_details),
+                    tint = MoreDetailsGreen
                 )
             }
 

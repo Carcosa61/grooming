@@ -168,6 +168,7 @@
     <string name="line_id_optional">Line ID (Optional)</string>
     <string name="line_id_value">Line ID: %1$s</string>
     <string name="more_details">More details</string>
+    <string name="add_more_details">Add More Details</string>
     <string name="weight_kg">Weight (kg)</string>
     <string name="groomer_name">Groomer Name</string>
 

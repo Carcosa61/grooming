@@ -69,7 +69,8 @@ fun AvatarPhotoPicker(
     onPhotoSelected: (Uri) -> Unit,
     onPhotoRemoved: () -> Unit,
     modifier: Modifier = Modifier,
-    size: Int = 96
+    size: Int = 96,
+    addLabel: String = stringResource(R.string.add_photo)
 ) {
     val launcher = rememberLauncherForActivityResult(
         CropImageContract()
@@ -115,7 +116,7 @@ fun AvatarPhotoPicker(
             }
         } else {
             TextButton(onClick = pick) {
-                Text(stringResource(R.string.add_photo))
+                Text(addLabel)
             }
         }
     }
