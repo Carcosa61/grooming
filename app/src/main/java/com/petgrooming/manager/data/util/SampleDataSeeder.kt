@@ -1,10 +1,15 @@
 package com.petgrooming.manager.data.util
 
 import android.content.Context
+import com.petgrooming.manager.data.local.entity.BookingEntity
+import com.petgrooming.manager.data.local.entity.BookingStatus
 import com.petgrooming.manager.data.local.entity.Gender
 import com.petgrooming.manager.data.local.entity.OwnerEntity
+import com.petgrooming.manager.data.local.entity.PaymentStatus
 import com.petgrooming.manager.data.local.entity.PetEntity
 import com.petgrooming.manager.data.local.entity.PetType
+import com.petgrooming.manager.data.local.entity.ServiceType
+import com.petgrooming.manager.domain.repository.BookingRepository
 import com.petgrooming.manager.domain.repository.OwnerRepository
 import com.petgrooming.manager.domain.repository.PetRepository
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -14,6 +19,7 @@ import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 import java.time.LocalDate
+import java.time.LocalTime
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -26,7 +32,8 @@ import javax.inject.Singleton
 class SampleDataSeeder @Inject constructor(
     @ApplicationContext private val context: Context,
     private val ownerRepository: OwnerRepository,
-    private val petRepository: PetRepository
+    private val petRepository: PetRepository,
+    private val bookingRepository: BookingRepository
 ) {
     private val scope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -35,14 +42,16 @@ class SampleDataSeeder @Inject constructor(
         if (prefs.getBoolean(KEY_SEEDED, false)) return
 
         scope.launch {
-            // Overwrite any existing data (pets cascade-delete with their owner).
+            // Overwrite any existing data (pets and bookings cascade-delete with their owner).
             ownerRepository.getAllOwners().first().forEach { ownerRepository.deleteOwner(it) }
 
             val ownerIds = SAMPLE_OWNERS.map { ownerRepository.insertOwner(it) }
 
-            SAMPLE_PETS.forEach { (ownerIndex, pet) ->
+            val petIds = SAMPLE_PETS.map { (ownerIndex, pet) ->
                 petRepository.insertPet(pet.copy(ownerId = ownerIds[ownerIndex]))
             }
+
+            sampleBookings(petIds).forEach { bookingRepository.insertBooking(it) }
 
             prefs.edit().putBoolean(KEY_SEEDED, true).apply()
         }
@@ -50,7 +59,83 @@ class SampleDataSeeder @Inject constructor(
 
     companion object {
         private const val PREFS_NAME = "sample_data"
-        private const val KEY_SEEDED = "sample_data_seeded_v1"
+        private const val KEY_SEEDED = "sample_data_seeded_v2"
+
+        /**
+         * A mix of completed (past) and scheduled (upcoming) bookings spread across the
+         * seeded pets, with relative dates so the dashboard/calendar always show activity.
+         */
+        private fun sampleBookings(petIds: List<Long>): List<BookingEntity> {
+            val today = LocalDate.now()
+            return listOf(
+                BookingEntity(
+                    petId = petIds[0], appointmentDate = today.minusDays(14), appointmentTime = LocalTime.of(10, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.COMPLETED,
+                    price = 800.0, paymentStatus = PaymentStatus.PAID, groomerName = "พี่แอน"
+                ),
+                BookingEntity(
+                    petId = petIds[2], appointmentDate = today.minusDays(10), appointmentTime = LocalTime.of(11, 30),
+                    serviceType = ServiceType.BATH_AND_DRY, status = BookingStatus.COMPLETED,
+                    price = 400.0, paymentStatus = PaymentStatus.PAID, groomerName = "พี่บอย"
+                ),
+                BookingEntity(
+                    petId = petIds[4], appointmentDate = today.minusDays(7), appointmentTime = LocalTime.of(13, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.COMPLETED,
+                    price = 1200.0, paymentStatus = PaymentStatus.PAID, groomerName = "พี่แอน",
+                    notes = "ขนยาวมาก ใช้เวลานาน"
+                ),
+                BookingEntity(
+                    petId = petIds[8], appointmentDate = today.minusDays(5), appointmentTime = LocalTime.of(9, 30),
+                    serviceType = ServiceType.NAIL_TRIM, status = BookingStatus.COMPLETED,
+                    price = 150.0, paymentStatus = PaymentStatus.PAID, groomerName = "พี่บอย"
+                ),
+                BookingEntity(
+                    petId = petIds[11], appointmentDate = today.minusDays(3), appointmentTime = LocalTime.of(15, 0),
+                    serviceType = ServiceType.BATH, status = BookingStatus.COMPLETED,
+                    price = 300.0, paymentStatus = PaymentStatus.PAID, groomerName = "พี่แอน"
+                ),
+                BookingEntity(
+                    petId = petIds[16], appointmentDate = today.minusDays(2), appointmentTime = LocalTime.of(14, 30),
+                    serviceType = ServiceType.EAR_CLEANING, status = BookingStatus.NO_SHOW,
+                    price = 150.0, paymentStatus = PaymentStatus.UNPAID
+                ),
+                BookingEntity(
+                    petId = petIds[1], appointmentDate = today, appointmentTime = LocalTime.of(10, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.SCHEDULED,
+                    price = 800.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่แอน"
+                ),
+                BookingEntity(
+                    petId = petIds[6], appointmentDate = today, appointmentTime = LocalTime.of(13, 30),
+                    serviceType = ServiceType.BATH_AND_DRY, status = BookingStatus.SCHEDULED,
+                    price = 450.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่บอย"
+                ),
+                BookingEntity(
+                    petId = petIds[9], appointmentDate = today.plusDays(1), appointmentTime = LocalTime.of(11, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.SCHEDULED,
+                    price = 1000.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่แอน"
+                ),
+                BookingEntity(
+                    petId = petIds[13], appointmentDate = today.plusDays(2), appointmentTime = LocalTime.of(9, 0),
+                    serviceType = ServiceType.NAIL_TRIM, status = BookingStatus.SCHEDULED,
+                    price = 150.0, paymentStatus = PaymentStatus.UNPAID
+                ),
+                BookingEntity(
+                    petId = petIds[18], appointmentDate = today.plusDays(3), appointmentTime = LocalTime.of(14, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.SCHEDULED,
+                    price = 900.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่บอย"
+                ),
+                BookingEntity(
+                    petId = petIds[19], appointmentDate = today.plusDays(5), appointmentTime = LocalTime.of(10, 30),
+                    serviceType = ServiceType.BATH_AND_DRY, status = BookingStatus.SCHEDULED,
+                    price = 400.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่แอน"
+                ),
+                BookingEntity(
+                    petId = petIds[3], appointmentDate = today.plusDays(7), appointmentTime = LocalTime.of(16, 0),
+                    serviceType = ServiceType.FULL_GROOM, status = BookingStatus.SCHEDULED,
+                    price = 850.0, paymentStatus = PaymentStatus.UNPAID, groomerName = "พี่บอย"
+                )
+            )
+        }
 
         private val SAMPLE_OWNERS = listOf(
             OwnerEntity(name = "สมชาย ใจดี", mobileNumber = "081-234-5678", lineId = "somchai.j"),
