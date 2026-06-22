@@ -20,8 +20,10 @@ import com.petgrooming.manager.ui.feature.pets.PetFormScreen
 import com.petgrooming.manager.ui.feature.pets.PetsScreen
 import com.petgrooming.manager.ui.feature.settings.ServicePriceScreen
 import com.petgrooming.manager.ui.feature.settings.SettingsScreen
+import com.petgrooming.manager.ui.feature.splash.SplashScreen
 
 object Routes {
+    const val SPLASH = "splash"
     const val DASHBOARD = "dashboard"
     const val BOOKINGS = "bookings"
     const val BOOKINGS_WITH_DATE = "bookings?date={date}"
@@ -60,9 +62,19 @@ fun PetGroomingNavHost(
 ) {
     NavHost(
         navController = navController,
-        startDestination = Routes.DASHBOARD,
+        startDestination = Routes.SPLASH,
         modifier = modifier
     ) {
+        composable(Routes.SPLASH) {
+            SplashScreen(
+                onSplashComplete = {
+                    navController.navigate(Routes.DASHBOARD) {
+                        popUpTo(Routes.SPLASH) { inclusive = true }
+                    }
+                }
+            )
+        }
+
         composable(Routes.DASHBOARD) {
             DashboardScreen(
                 onNavigateToBookings = { navController.navigate(Routes.BOOKINGS) },

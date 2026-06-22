@@ -194,6 +194,16 @@
     <string name="enter_custom_breed">Enter breed name</string>
     <string name="enter_custom_color">Enter color</string>
 
+    <!-- About App Section -->
+    <string name="about_app_section">About This App</string>
+    <string name="about_app_description">Pet Grooming Manager helps you schedule appointments, manage customers, and track your furry clients.</string>
+    <string name="how_to_use_section">How to Use</string>
+    <string name="how_to_use_content">• Dashboard: See today\'s appointments\n• Bookings: Create and manage appointments\n• Pets: Add customers and their pets\n• Calendar: View schedule by date\n• Settings: Change language and preferences</string>
+    <string name="current_features_section">Current Features</string>
+    <string name="current_features_content">• Appointment booking and management\n• Customer and pet records\n• Calendar view\n• Service pricing\n• Thai and English languages\n• Data backup and restore</string>
+    <string name="future_features_section">Coming Soon</string>
+    <string name="future_features_content">• Push notifications for appointments\n• Automatic rebooking reminders\n• Google Drive sync\n• Business reports and analytics</string>
+
     <!-- Settings -->
     <string name="language_section">Language</string>
     <string name="language_restart_hint">Language change will take effect immediately.</string>

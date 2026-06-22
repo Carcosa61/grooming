@@ -95,30 +95,34 @@ fun MainScreen() {
         bottomBar = {
             val navBackStackEntry by navController.currentBackStackEntryAsState()
             val currentDestination = navBackStackEntry?.destination
+            val currentRoute = currentDestination?.route
 
-            NavigationBar {
-                navItems.forEach { item ->
-                    NavigationBarItem(
-                        selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true,
-                        onClick = {
-                            navController.navigate(item.route) {
-                                popUpTo(navController.graph.findStartDestination().id) {
-                                    saveState = true
+            // Hide bottom bar during splash screen
+            if (currentRoute != Routes.SPLASH) {
+                NavigationBar {
+                    navItems.forEach { item ->
+                        NavigationBarItem(
+                            selected = currentDestination?.hierarchy?.any { it.route?.substringBefore("?") == item.route } == true,
+                            onClick = {
+                                navController.navigate(item.route) {
+                                    popUpTo(navController.graph.findStartDestination().id) {
+                                        saveState = true
+                                    }
+                                    launchSingleTop = true
+                                    restoreState = true
                                 }
-                                launchSingleTop = true
-                                restoreState = true
+                            },
+                            icon = { Icon(item.icon, contentDescription = null) },
+                            label = { 
+                                Text(
+                                    text = stringResource(item.labelResId),
+                                    fontSize = 10.sp,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                ) 
                             }
-                        },
-                        icon = { Icon(item.icon, contentDescription = null) },
-                        label = { 
-                            Text(
-                                text = stringResource(item.labelResId),
-                                fontSize = 10.sp,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            ) 
-                        }
-                    )
+                        )
+                    }
                 }
             }
         }

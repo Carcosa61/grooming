@@ -9,6 +9,7 @@ import android.os.LocaleList
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatDelegate
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,6 +27,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CloudUpload
+import androidx.compose.material.icons.filled.ExpandLess
+import androidx.compose.material.icons.filled.ExpandMore
+import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Pets
 import androidx.compose.material.icons.filled.Restore
@@ -138,6 +142,11 @@ fun SettingsScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
+            // About App Section
+            AboutAppSection()
+
+            Spacer(modifier = Modifier.height(16.dp))
+
             // Language Section
             Text(
                 text = stringResource(R.string.language_section),
@@ -445,6 +454,114 @@ private fun LanguageOption(
         },
         modifier = Modifier.clickable(onClick = onClick)
     )
+}
+
+@Composable
+private fun AboutAppSection() {
+    var howToUseExpanded by remember { mutableStateOf(false) }
+    var currentFeaturesExpanded by remember { mutableStateOf(false) }
+    var futureFeaturesExpanded by remember { mutableStateOf(false) }
+
+    // Section Header
+    Text(
+        text = stringResource(R.string.about_app_section),
+        style = MaterialTheme.typography.titleMedium,
+        color = MaterialTheme.colorScheme.primary,
+        modifier = Modifier.padding(16.dp)
+    )
+
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        colors = CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceVariant
+        )
+    ) {
+        Column(modifier = Modifier.padding(16.dp)) {
+            // Always visible description
+            Row(verticalAlignment = Alignment.Top) {
+                Icon(
+                    imageVector = Icons.Default.Info,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.padding(end = 12.dp, top = 2.dp)
+                )
+                Text(
+                    text = stringResource(R.string.about_app_description),
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+
+        HorizontalDivider()
+
+        // How to Use - expandable
+        ExpandableSection(
+            title = stringResource(R.string.how_to_use_section),
+            expanded = howToUseExpanded,
+            onToggle = { howToUseExpanded = !howToUseExpanded },
+            content = stringResource(R.string.how_to_use_content)
+        )
+
+        HorizontalDivider()
+
+        // Current Features - expandable
+        ExpandableSection(
+            title = stringResource(R.string.current_features_section),
+            expanded = currentFeaturesExpanded,
+            onToggle = { currentFeaturesExpanded = !currentFeaturesExpanded },
+            content = stringResource(R.string.current_features_content)
+        )
+
+        HorizontalDivider()
+
+        // Future Features - expandable
+        ExpandableSection(
+            title = stringResource(R.string.future_features_section),
+            expanded = futureFeaturesExpanded,
+            onToggle = { futureFeaturesExpanded = !futureFeaturesExpanded },
+            content = stringResource(R.string.future_features_content)
+        )
+    }
+}
+
+@Composable
+private fun ExpandableSection(
+    title: String,
+    expanded: Boolean,
+    onToggle: () -> Unit,
+    content: String
+) {
+    Column {
+        ListItem(
+            headlineContent = {
+                Text(
+                    text = title,
+                    style = MaterialTheme.typography.titleSmall,
+                    color = MaterialTheme.colorScheme.onSurface
+                )
+            },
+            trailingContent = {
+                Icon(
+                    imageVector = if (expanded) Icons.Default.ExpandLess else Icons.Default.ExpandMore,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            },
+            colors = ListItemDefaults.colors(containerColor = MaterialTheme.colorScheme.surfaceVariant),
+            modifier = Modifier.clickable(onClick = onToggle)
+        )
+        AnimatedVisibility(visible = expanded) {
+            Text(
+                text = content,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+            )
+        }
+    }
 }
 
 private fun applyLanguage(context: Context, languageCode: String) {

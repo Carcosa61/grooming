@@ -188,6 +188,16 @@
     <string name="enter_custom_breed">ป้อนชื่อสายพันธุ์</string>
     <string name="enter_custom_color">ป้อนสี</string>
 
+    <!-- About App Section -->
+    <string name="about_app_section">เกี่ยวกับแอปนี้</string>
+    <string name="about_app_description">Pet Grooming Manager ช่วยจัดตารางนัดหมาย จัดการลูกค้า และติดตามสัตว์เลี้ยงของคุณ</string>
+    <string name="how_to_use_section">วิธีใช้งาน</string>
+    <string name="how_to_use_content">• แดชบอร์ด: ดูนัดหมายวันนี้\n• การจอง: สร้างและจัดการนัดหมาย\n• สัตว์เลี้ยง: เพิ่มลูกค้าและสัตว์เลี้ยง\n• ปฏิทิน: ดูตารางตามวันที่\n• ตั้งค่า: เปลี่ยนภาษาและการตั้งค่า</string>
+    <string name="current_features_section">ฟีเจอร์ปัจจุบัน</string>
+    <string name="current_features_content">• จองและจัดการนัดหมาย\n• บันทึกลูกค้าและสัตว์เลี้ยง\n• มุมมองปฏิทิน\n• ราคาบริการ\n• ภาษาไทยและอังกฤษ\n• สำรองและกู้คืนข้อมูล</string>
+    <string name="future_features_section">เร็วๆ นี้</string>
+    <string name="future_features_content">• การแจ้งเตือนนัดหมาย\n• เตือนการจองซ้ำอัตโนมัติ\n• ซิงค์ Google Drive\n• รายงานและการวิเคราะห์ธุรกิจ</string>
+
     <!-- Settings -->
     <string name="language_section">ภาษา</string>
     <string name="language_restart_hint">การเปลี่ยนภาษาจะมีผลทันที</string>
